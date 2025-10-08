@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+  <script type="text/brightscript" uri="MainScene.brs" />
+  
+  <children>
+    <Label id="testLabel" text="Dartt's IPTV" />
+    <Label id="statusLabel" text="Loading..." translation="[0,100]" />
+  </children>
+</component>

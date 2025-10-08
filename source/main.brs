@@ -15,7 +15,6 @@ sub Main()
     InitializeAppConfig()
 
     scene = screen.CreateScene("MainScene")
-    screen.SetRoot(scene)
     screen.Show()
 
     while true

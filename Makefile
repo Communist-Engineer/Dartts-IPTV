@@ -35,6 +35,7 @@ build:
 	@rm -rf $(BUILD_DIR)/*
 	@cp manifest $(BUILD_DIR)/
 	@cp -r source $(BUILD_DIR)/
+	@if [ -d components ]; then cp -r components $(BUILD_DIR)/; fi
 	@find $(BUILD_DIR) -name ".DS_Store" -delete
 	@echo "✓ Build complete"
 
