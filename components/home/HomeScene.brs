@@ -515,19 +515,15 @@ sub LoadPlaylistsInBackground()
     LogInfo("HOME", "Starting background playlist load")
     m.isLoading = true
     
-    ' Test if we can create ANY task first
-    testTask = CreateObject("roSGNode", "TestTask")
-    if testTask = invalid then
-        LogError("HOME", "Failed to create TestTask - component registration issue")
+    ' Create and configure the loader task
+    m.loaderTask = CreateObject("roSGNode", "PlaylistLoaderTask")
+    if m.loaderTask = invalid then
+        LogError("HOME", "Failed to create PlaylistLoaderTask")
         ShowError("Failed to initialize playlist loader", false)
         m.isLoading = false
         return
-    else
-        LogInfo("HOME", "TestTask created successfully")
     end if
     
-    ' Create and configure the loader task
-    m.loaderTask = CreateObject("roSGNode", "PlaylistLoaderTask")
     m.loaderTask.playlistUrls = m.settings.playlists
     
     ' Observe task completion
