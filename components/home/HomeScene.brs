@@ -658,7 +658,7 @@ sub OnAddPlaylistDialogButton()
             m.settings.playlists.Push(newUrl)
             SaveSettings(m.settings)
             
-            ' Reload playlists
+            ' Reload playlists immediately
             if m.subtitle <> invalid then m.subtitle.text = "Loading new playlist..."
             LoadPlaylistsInBackground()
         end if
@@ -804,6 +804,13 @@ end sub
 sub OnSettingsClosed()
     LogInfo("HOME", "OnSettingsClosed called")
     
+    ' Check if reload is required
+    needsReload = false
+    if m.settingsModal <> invalid and m.settingsModal.reloadRequired = true then
+        needsReload = true
+        LogInfo("HOME", "Settings modal signaled reload required")
+    end if
+    
     ' Remove the modal from scene
     if m.settingsModal <> invalid then
         m.top.removeChild(m.settingsModal)
@@ -827,9 +834,16 @@ sub OnSettingsClosed()
         LogWarn("HOME", "Could not return focus - m.menuItems is invalid")
     end if
     
-    ' Reload settings after modal closes - don't call UpdateUI which may cause re-init
+    ' Reload settings after modal closes
     m.settings = LoadSettings()
     LogInfo("HOME", "Settings closed, settings reloaded")
+    
+    ' Reload channels if required
+    if needsReload then
+        LogInfo("HOME", "Reloading channels after settings change")
+        if m.subtitle <> invalid then m.subtitle.text = "Reloading playlists..."
+        LoadPlaylistsInBackground()
+    end if
 end sub
 
 sub HandleDeepLink(args as object)

@@ -2,6 +2,7 @@
 <component name="SettingsModal" extends="Group" focusable="true">
     <interface>
         <field id="closed" type="boolean" alwaysNotify="true" />
+        <field id="reloadRequired" type="boolean" value="false" />
     </interface>
     
     <children>

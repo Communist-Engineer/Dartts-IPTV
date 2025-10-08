@@ -152,18 +152,53 @@ end sub
 sub PlayChannel(channel as object)
     LogInfo("CHANNELLIST", "Playing channel: " + channel.title)
     
-    ' TODO: Implement video player navigation
-    ' For now, just show a simple message dialog
-    ' Note: Creating Dialog on m.top instead of GetScene()
-    dialog = CreateObject("roSGNode", "Dialog")
-    dialog.title = "Play Channel"
-    dialog.message = "Now playing: " + channel.title
-    dialog.buttons = ["OK"]
+    ' Get or create the video player scene
+    appScene = m.top.GetParent()
+    if appScene = invalid then
+        LogError("CHANNELLIST", "Cannot get parent scene")
+        return
+    end if
     
-    ' Show the dialog
-    m.top.GetParent().GetScene().dialog = dialog
+    ' Find or create the video player
+    videoPlayer = appScene.FindNode("videoPlayerScene")
+    if videoPlayer = invalid then
+        LogInfo("CHANNELLIST", "Creating new VideoPlayerScene")
+        videoPlayer = CreateObject("roSGNode", "VideoPlayerScene")
+        videoPlayer.id = "videoPlayerScene"
+        appScene.appendChild(videoPlayer)
+        
+        ' Observe when player wants to close
+        videoPlayer.ObserveField("closeRequested", "OnPlayerCloseRequested")
+    end if
     
-    LogInfo("CHANNELLIST", "Dialog should be displayed")
+    ' Hide the channel list
+    m.top.visible = false
+    
+    ' Show and start the player with the selected channel
+    videoPlayer.visible = true
+    videoPlayer.channel = channel
+    videoPlayer.setFocus(true)
+    
+    LogInfo("CHANNELLIST", "Video player launched for: " + channel.title)
+end sub
+
+sub OnPlayerCloseRequested()
+    ' Player wants to close - show channel list again
+    appScene = m.top.GetParent()
+    if appScene = invalid then return
+    
+    videoPlayer = appScene.FindNode("videoPlayerScene")
+    if videoPlayer <> invalid then
+        videoPlayer.visible = false
+    end if
+    
+    ' Show channel list and restore focus
+    m.top.visible = true
+    if m.channelList <> invalid then
+        m.channelList.setFocus(true)
+    end if
+    
+    LogInfo("CHANNELLIST", "Returned from video player")
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean

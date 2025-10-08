@@ -5,11 +5,16 @@
         <field id="closeRequested" type="boolean" alwaysNotify="true" />
     </interface>
     <children>
-        <Video id="videoNode" translation="[0,0]" width="1920" height="1080" />
+        <Video 
+            id="videoNode" 
+            translation="[0,0]" 
+            width="1280" 
+            height="720"
+            enableUI="false" />
         <PlayerOverlay id="playerOverlay" translation="[0,0]" />
         <Rectangle id="loadingBg" translation="[0,0]" width="1920" height="1080" color="0x000000FF" visible="false" />
-        <Label id="loadingLabel" translation="[860,520]" font="font:LargeBoldSystemFont" text="Loading..." visible="false" />
+        <Label id="loadingLabel" translation="[860,520]" font="font:LargeBoldSystemFont" text="Loading..." color="0xFFFFFFFF" visible="false" />
         <Label id="errorLabel" translation="[660,520]" font="font:MediumBoldSystemFont" text="" color="0xFF0000FF" visible="false" />
     </children>
-    <script type="text/brightscript" uri="pkg:/components/player/VideoPlayerScene.brs" entry="VideoPlayerSceneInit" />
+    <script type="text/brightscript" uri="pkg:/components/player/VideoPlayerScene.brs" />
 </component>

@@ -1,30 +1,96 @@
-sub VideoPlayerSceneInit()
+' ============================
+' Logger Helper Functions
+' ============================
+sub LogDebug(tag as string, message as string)
+    print "[DEBUG] [" + tag + "] " + message
+end sub
+
+sub LogInfo(tag as string, message as string)
+    print "[INFO] [" + tag + "] " + message
+end sub
+
+sub LogWarn(tag as string, message as string)
+    print "[WARN] [" + tag + "] " + message
+end sub
+
+sub LogError(tag as string, message as string)
+    print "[ERROR] [" + tag + "] " + message
+end sub
+
+sub init()
+    LogInfo("VideoPlayer", "Initializing Video Player Scene")
+    
     m.videoNode = m.top.FindNode("videoNode")
     m.playerOverlay = m.top.FindNode("playerOverlay")
     m.loadingBg = m.top.FindNode("loadingBg")
     m.loadingLabel = m.top.FindNode("loadingLabel")
     m.errorLabel = m.top.FindNode("errorLabel")
     
-    m.top.ObserveField("channel", "VideoPlayerOnChannelChanged")
-    m.videoNode.ObserveField("state", "VideoPlayerOnStateChanged")
-    m.videoNode.ObserveField("position", "VideoPlayerOnPositionChanged")
+    if m.videoNode <> invalid then
+        ' Configure video scaling to fit screen properly
+        ' Using 720p as it's a common resolution and should scale better
+        m.videoNode.width = 1280
+        m.videoNode.height = 720
+        m.videoNode.translation = [0, 0]
+        
+        ' Set video to fill the available space while maintaining aspect ratio
+        ' This prevents distortion but may add letterboxing/pillarboxing
+        m.videoNode.enableUI = false
+        m.videoNode.notificationInterval = 1
+        
+        ' Observe fields for state management
+        m.top.ObserveField("channel", "VideoPlayerOnChannelChanged")
+        m.videoNode.ObserveField("state", "VideoPlayerOnStateChanged")
+        m.videoNode.ObserveField("position", "VideoPlayerOnPositionChanged")
+        m.videoNode.setFocus(true)
+        
+        LogInfo("VideoPlayer", "Video node configured: 1280x720")
+    else
+        LogError("VideoPlayer", "Failed to find videoNode")
+    end if
     
     m.overlayTimer = invalid
-    m.videoNode.setFocus(true)
+    
+    LogInfo("VideoPlayer", "Video Player Scene initialized")
 end sub
 
 sub VideoPlayerOnChannelChanged()
     channel = m.top.channel
     if channel = invalid then return
     
+    LogInfo("VideoPlayer", "Loading channel: " + channel.title)
+    
     ShowLoading()
     
     content = CreateObject("roSGNode", "ContentNode")
-    content.title = channel.name
-    content.description = channel.Lookup("group", "")
+    content.title = channel.title
+    
+    if channel.DoesExist("group") and channel.group <> invalid then
+        content.description = channel.group
+    else
+        content.description = ""
+    end if
+    
     content.url = channel.streamUrl
     
-    if channel.logo <> invalid and channel.logo <> "" then
+    ' Set stream format based on URL
+    streamUrl = channel.streamUrl
+    if Instr(1, streamUrl, ".m3u8") > 0 or Instr(1, streamUrl, "/live/") > 0 then
+        content.streamFormat = "hls"
+    else if Instr(1, streamUrl, ".mp4") > 0 then
+        content.streamFormat = "mp4"
+    else
+        content.streamFormat = "hls" ' Default to HLS for live streams
+    end if
+    
+    ' Set video quality - the URL contains "/sd" which suggests SD quality
+    ' SD streams are typically 640x480 (4:3) or 854x480 (16:9)
+    ' Let Roku handle the scaling automatically
+    
+    LogInfo("VideoPlayer", "Stream URL: " + channel.streamUrl)
+    LogInfo("VideoPlayer", "Stream format: " + content.streamFormat)
+    
+    if channel.DoesExist("logo") and channel.logo <> invalid and channel.logo <> "" then
         content.hdPosterUrl = channel.logo
         content.sdPosterUrl = channel.logo
     end if
@@ -37,7 +103,9 @@ sub VideoPlayerOnChannelChanged()
     m.videoNode.content = content
     m.videoNode.control = "play"
     
-    m.playerOverlay.channel = channel
+    if m.playerOverlay <> invalid then
+        m.playerOverlay.channel = channel
+    end if
     ShowOverlay()
 end sub
 
@@ -95,7 +163,9 @@ sub HideError()
 end sub
 
 sub ShowOverlay()
-    m.playerOverlay.showInfo = true
+    if m.playerOverlay <> invalid then
+        m.playerOverlay.showInfo = true
+    end if
     
     ' Auto-hide overlay after 3 seconds
     if m.overlayTimer <> invalid then
@@ -120,19 +190,28 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
     
     if key = "back" then
-        m.videoNode.control = "stop"
+        if m.videoNode <> invalid then
+            m.videoNode.control = "stop"
+        end if
         m.top.closeRequested = true
+        LogInfo("VideoPlayer", "Back pressed - closing player")
         return true
     else if key = "OK" or key = "play" then
-        if m.videoNode.state = "playing" then
-            m.videoNode.control = "pause"
-        else
-            m.videoNode.control = "play"
+        if m.videoNode <> invalid then
+            if m.videoNode.state = "playing" then
+                m.videoNode.control = "pause"
+                LogInfo("VideoPlayer", "Paused")
+            else
+                m.videoNode.control = "play"
+                LogInfo("VideoPlayer", "Playing")
+            end if
         end if
         ShowOverlay()
         return true
     else if key = "info" then
-        m.playerOverlay.showInfo = not m.playerOverlay.showInfo
+        if m.playerOverlay <> invalid then
+            m.playerOverlay.showInfo = not m.playerOverlay.showInfo
+        end if
         return true
     else if key = "left" or key = "right" then
         ' TODO: Implement channel zapping

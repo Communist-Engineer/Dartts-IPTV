@@ -1,4 +1,4 @@
-sub PlayerOverlayInit()
+sub init()
     m.background = m.top.FindNode("background")
     m.titleLabel = m.top.FindNode("titleLabel")
     m.groupLabel = m.top.FindNode("groupLabel")
@@ -18,11 +18,15 @@ sub PlayerOverlayOnChannelChanged()
     if channel = invalid then return
 
     if m.titleLabel <> invalid then
-        m.titleLabel.text = channel.name
+        if channel.DoesExist("title") and channel.title <> invalid then
+            m.titleLabel.text = channel.title
+        else
+            m.titleLabel.text = ""
+        end if
     end if
 
     if m.groupLabel <> invalid then
-        if channel.Lookup("group") <> invalid then
+        if channel.DoesExist("group") and channel.group <> invalid then
             m.groupLabel.text = "Group: " + channel.group
         else
             m.groupLabel.text = ""

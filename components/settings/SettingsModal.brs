@@ -296,8 +296,11 @@ sub OnAddPlaylistDialogButton()
                 SaveSettings(settings)
                 LogInfo("SETTINGS", "Playlist added successfully")
                 
+                ' Signal reload required
+                m.top.reloadRequired = true
+                
                 ' Show success message
-                ShowInfoDialog("Playlist Added", "The playlist has been added and will be loaded on return to Home.")
+                ShowInfoDialog("Playlist Added", "The playlist has been added and channels will reload when you close Settings.")
             else
                 ShowInfoDialog("Already Exists", "This playlist URL is already configured.")
             end if
@@ -317,14 +320,174 @@ sub ShowManagePlaylistsDialog()
         return
     end if
     
-    ' Build message with playlist list
-    message = "Configured playlists:" + Chr(10) + Chr(10)
-    for i = 0 to settings.playlists.Count() - 1
-        message = message + Str(i + 1) + ". " + settings.playlists[i] + Chr(10)
-    end for
-    message = message + Chr(10) + "Use Settings on device to remove playlists."
+    ' Store playlists for management
+    m.managedPlaylists = settings.playlists
+    m.managePlaylistIndex = 0
     
-    ShowInfoDialog("Manage Playlists", message)
+    ' Show first playlist for management
+    ShowPlaylistActionDialog()
+end sub
+
+sub ShowPlaylistActionDialog()
+    if m.managedPlaylists = invalid or m.managePlaylistIndex >= m.managedPlaylists.Count() then
+        ' Done managing - return to settings
+        m.managedPlaylists = invalid
+        m.managePlaylistIndex = 0
+        return
+    end if
+    
+    currentUrl = m.managedPlaylists[m.managePlaylistIndex]
+    
+    ' Truncate URL for display
+    displayUrl = currentUrl
+    if Len(displayUrl) > 80 then
+        displayUrl = Left(displayUrl, 77) + "..."
+    end if
+    
+    message = "Playlist " + Str(m.managePlaylistIndex + 1) + " of " + Str(m.managedPlaylists.Count()) + Chr(10) + Chr(10)
+    message = message + displayUrl + Chr(10) + Chr(10)
+    message = message + "What would you like to do?"
+    
+    dialog = CreateObject("roSGNode", "Dialog")
+    dialog.title = "Manage Playlist"
+    dialog.message = message
+    dialog.buttons = ["Edit", "Delete", "Next", "Done"]
+    m.top.GetScene().dialog = dialog
+    
+    dialog.ObserveField("buttonSelected", "OnPlaylistActionButton")
+    m.playlistActionDialog = dialog
+end sub
+
+sub OnPlaylistActionButton()
+    buttonIndex = m.playlistActionDialog.buttonSelected
+    m.top.GetScene().dialog = invalid
+    
+    if buttonIndex = 0 then
+        ' Edit
+        ShowEditPlaylistDialog()
+    else if buttonIndex = 1 then
+        ' Delete
+        ConfirmDeletePlaylist()
+    else if buttonIndex = 2 then
+        ' Next
+        m.managePlaylistIndex = m.managePlaylistIndex + 1
+        if m.managePlaylistIndex >= m.managedPlaylists.Count() then
+            m.managePlaylistIndex = 0
+        end if
+        ShowPlaylistActionDialog()
+    else if buttonIndex = 3 then
+        ' Done
+        m.managedPlaylists = invalid
+        m.managePlaylistIndex = 0
+    end if
+end sub
+
+sub ShowEditPlaylistDialog()
+    currentUrl = m.managedPlaylists[m.managePlaylistIndex]
+    
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog.title = "Edit Playlist URL"
+    dialog.text = currentUrl
+    dialog.message = "Edit the M3U playlist URL:"
+    dialog.buttons = ["Save", "Cancel"]
+    m.top.GetScene().dialog = dialog
+    
+    dialog.ObserveField("buttonSelected", "OnEditPlaylistDialogButton")
+    m.editPlaylistDialog = dialog
+end sub
+
+sub OnEditPlaylistDialogButton()
+    if m.editPlaylistDialog.buttonSelected = 0 then
+        ' Save button pressed
+        newUrl = m.editPlaylistDialog.text
+        if newUrl <> invalid and newUrl <> "" and newUrl <> m.managedPlaylists[m.managePlaylistIndex] then
+            LogInfo("SETTINGS", "Editing playlist URL")
+            
+            ' Update in memory
+            m.managedPlaylists[m.managePlaylistIndex] = newUrl
+            
+            ' Load and update settings
+            settings = LoadSettings()
+            settings.playlists = m.managedPlaylists
+            SaveSettings(settings)
+            
+            ' Signal reload required
+            m.top.reloadRequired = true
+            
+            LogInfo("SETTINGS", "Playlist updated successfully")
+            ShowInfoDialog("Playlist Updated", "The playlist URL has been updated. Channels will reload when you close Settings.")
+        end if
+    else
+        ' Cancel - go back to playlist action
+        ShowPlaylistActionDialog()
+    end if
+    
+    m.top.GetScene().dialog = invalid
+end sub
+
+sub ConfirmDeletePlaylist()
+    currentUrl = m.managedPlaylists[m.managePlaylistIndex]
+    
+    ' Truncate URL for display
+    displayUrl = currentUrl
+    if Len(displayUrl) > 60 then
+        displayUrl = Left(displayUrl, 57) + "..."
+    end if
+    
+    dialog = CreateObject("roSGNode", "Dialog")
+    dialog.title = "Delete Playlist"
+    dialog.message = "Delete this playlist?" + Chr(10) + Chr(10) + displayUrl
+    dialog.buttons = ["Delete", "Cancel"]
+    m.top.GetScene().dialog = dialog
+    
+    dialog.ObserveField("buttonSelected", "OnDeletePlaylistConfirm")
+    m.deletePlaylistDialog = dialog
+end sub
+
+sub OnDeletePlaylistConfirm()
+    if m.deletePlaylistDialog.buttonSelected = 0 then
+        ' Delete button pressed
+        LogInfo("SETTINGS", "Deleting playlist at index: " + Str(m.managePlaylistIndex))
+        
+        ' Remove from array
+        newPlaylists = []
+        for i = 0 to m.managedPlaylists.Count() - 1
+            if i <> m.managePlaylistIndex then
+                newPlaylists.Push(m.managedPlaylists[i])
+            end if
+        end for
+        
+        m.managedPlaylists = newPlaylists
+        
+        ' Save to settings
+        settings = LoadSettings()
+        settings.playlists = m.managedPlaylists
+        SaveSettings(settings)
+        
+        ' Signal reload required
+        m.top.reloadRequired = true
+        
+        LogInfo("SETTINGS", "Playlist deleted successfully")
+        
+        ' Adjust index if needed
+        if m.managePlaylistIndex >= m.managedPlaylists.Count() and m.managePlaylistIndex > 0 then
+            m.managePlaylistIndex = m.managePlaylistIndex - 1
+        end if
+        
+        ' Continue managing or finish
+        if m.managedPlaylists.Count() > 0 then
+            ShowInfoDialog("Playlist Deleted", "Playlist deleted. Channels will reload when you close Settings.")
+        else
+            ShowInfoDialog("All Playlists Deleted", "All playlists have been deleted. Add a new playlist to load channels.")
+            m.managedPlaylists = invalid
+            m.managePlaylistIndex = 0
+        end if
+    else
+        ' Cancel - go back to playlist action
+        ShowPlaylistActionDialog()
+    end if
+    
+    m.top.GetScene().dialog = invalid
 end sub
 
 sub ClearCacheWithConfirmation()
@@ -382,6 +545,11 @@ end sub
 
 sub OnInfoDialogButton()
     m.top.GetScene().dialog = invalid
+    
+    ' If we were managing playlists, continue if there are more
+    if m.managedPlaylists <> invalid and m.managedPlaylists.Count() > 0 then
+        ShowPlaylistActionDialog()
+    end if
 end sub
 
 sub CloseModal()
