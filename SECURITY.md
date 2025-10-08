@@ -86,10 +86,10 @@ If you discover a security vulnerability in Dartt's IPTV, please report it respo
 ## Contact
 
 For security inquiries:
-- **GitHub**: [Open a private security advisory](https://github.com/darttdev/Dartts-IPTV/security/advisories)
+- **GitHub**: [Open a private security advisory](https://github.com/Communist-Engineer/Dartts-IPTV/security/advisories)
 - **Email**: (Provide email if available)
 
-For general issues, use the [public issue tracker](https://github.com/darttdev/Dartts-IPTV/issues).
+For general issues, use the [public issue tracker](https://github.com/Communist-Engineer/Dartts-IPTV/issues).
 
 ---
 

@@ -40,10 +40,11 @@ This application is a **player only**. You must supply your own M3U/M3U8 playlis
 
 ### 2. Clone and Build
 
+## Quick Start
+
 ```bash
-git clone https://github.com/darttdev/Dartts-IPTV.git
+git clone https://github.com/Communist-Engineer/Dartts-IPTV.git
 cd Dartts-IPTV
-```
 
 ### 3. Configure Your Roku
 
@@ -260,8 +261,8 @@ This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for d
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/darttdev/Dartts-IPTV/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/darttdev/Dartts-IPTV/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Communist-Engineer/Dartts-IPTV/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Communist-Engineer/Dartts-IPTV/discussions)
 - **Documentation**: [docs/](docs/)
 
 ---

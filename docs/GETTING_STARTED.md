@@ -1,6 +1,9 @@
 # Getting Started with Dartt's IPTV
 
-This guide walks you through setting up and using Dartt's IPTV on your Roku device.
+This guide walks you thro1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/Communist-Engineer/Dartts-IPTV.git
+   cd Dartts-IPTVsetting up and using Dartt's IPTV on your Roku device.
 
 ---
 
@@ -46,9 +49,9 @@ Example: `192.168.1.100`
 
 ## Step 3: Install Dartt's IPTV
 
-### Option A: Pre-built Package (Easiest)
+### Option 1: Download Pre-built Package
 
-1. Download the latest `DarttsIPTV.zip` from [Releases](https://github.com/darttdev/Dartts-IPTV/releases)
+1. Download the latest `DarttsIPTV.zip` from [Releases](https://github.com/Communist-Engineer/Dartts-IPTV/releases)
 2. Open a web browser and navigate to:
    ```
    http://YOUR_ROKU_IP

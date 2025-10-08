@@ -168,11 +168,10 @@ make package
 
 ## 🔧 Development Workflow
 
-1. **Clone & Setup**
+1. **Clone the Repository**
    ```bash
-   git clone https://github.com/darttdev/Dartts-IPTV.git
+   git clone https://github.com/Communist-Engineer/Dartts-IPTV.git
    cd Dartts-IPTV
-   ```
 
 2. **Make Changes**
    - Edit BrightScript files in `source/`
@@ -280,8 +279,8 @@ Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/darttdev/Dartts-IPTV/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/darttdev/Dartts-IPTV/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Communist-Engineer/Dartts-IPTV/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Communist-Engineer/Dartts-IPTV/discussions)
 - **Docs**: [docs/](docs/)
 
 ---

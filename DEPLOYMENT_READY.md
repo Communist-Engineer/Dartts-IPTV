@@ -115,7 +115,7 @@ Dartt's IPTV does NOT provide any video streams or channels.
 You must supply your own M3U playlists and have legal rights to view all content you load.
 This is a player application only.
 
-Open source on GitHub: github.com/darttdev/Dartts-IPTV
+Open source on GitHub: github.com/Communist-Engineer/Dartts-IPTV
 ```
 
 ---

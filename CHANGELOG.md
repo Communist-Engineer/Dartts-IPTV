@@ -92,4 +92,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[1.0.0]: https://github.com/darttdev/Dartts-IPTV/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Communist-Engineer/Dartts-IPTV/releases/tag/v1.0.0

@@ -21,7 +21,7 @@ Violations may result in removal from the project.
 
 ### Reporting Bugs
 
-1. Check [existing issues](https://github.com/darttdev/Dartts-IPTV/issues) to avoid duplicates
+1. Check [existing issues](https://github.com/Communist-Engineer/Dartts-IPTV/issues) to avoid duplicates
 2. Create a new issue with:
    - Clear title and description
    - Steps to reproduce
@@ -213,7 +213,9 @@ Update relevant documentation:
 
 ## Questions?
 
-- Open a [Discussion](https://github.com/darttdev/Dartts-IPTV/discussions)
+### Questions
+
+- Open a [Discussion](https://github.com/Communist-Engineer/Dartts-IPTV/discussions)
 - Comment on existing issues
 - Reach out to maintainers
 
