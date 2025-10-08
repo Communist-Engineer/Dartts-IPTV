@@ -76,11 +76,15 @@ sub PopulateChannelList()
     ' Create content node for the list
     content = CreateObject("roSGNode", "ContentNode")
     
-    ' Add each channel as a child content node
+    ' For vertical scrolling: Create one row per channel (each row has 1 item)
     for i = 0 to m.top.channels.Count() - 1
         channel = m.top.channels[i]
         if channel <> invalid then
-            item = content.CreateChild("ContentNode")
+            ' Create a row for this channel
+            row = content.CreateChild("ContentNode")
+            
+            ' Create the channel item as the only child of this row
+            item = row.CreateChild("ContentNode")
             
             ' Set standard ContentNode fields
             if channel.title <> invalid then item.title = channel.title
@@ -103,15 +107,36 @@ sub PopulateChannelList()
     ' Set focus on the channel list after populating
     m.channelList.setFocus(true)
     
-    LogInfo("CHANNELLIST", "Channel list populated with " + Str(content.getChildCount()) + " items and focused")
+    LogInfo("CHANNELLIST", "Channel list populated with " + Str(content.getChildCount()) + " rows and focused")
 end sub
 
 sub OnChannelSelected()
     ' User selected a channel from the list
-    selectedIndex = m.channelList.itemSelected
+    ' For RowList, itemSelected is an array [row, col]
+    itemSelectedArray = m.channelList.itemSelected
     
-    if selectedIndex >= 0 and selectedIndex < m.top.channels.Count() then
-        selectedChannel = m.top.channels[selectedIndex]
+    if itemSelectedArray = invalid then
+        LogInfo("CHANNELLIST", "itemSelected is invalid")
+        return
+    end if
+    
+    LogInfo("CHANNELLIST", "OnChannelSelected called, itemSelected type: " + Type(itemSelectedArray))
+    
+    ' Check if it's an array or just an integer
+    rowIndex = -1
+    if Type(itemSelectedArray) = "roArray" then
+        if itemSelectedArray.Count() >= 1 then
+            rowIndex = itemSelectedArray[0]
+        end if
+    else if Type(itemSelectedArray) = "roInt" or Type(itemSelectedArray) = "Integer" then
+        ' Sometimes it's just an integer representing the row
+        rowIndex = itemSelectedArray
+    end if
+    
+    LogInfo("CHANNELLIST", "Row index: " + Str(rowIndex) + ", Total channels: " + Str(m.top.channels.Count()))
+    
+    if rowIndex >= 0 and rowIndex < m.top.channels.Count() then
+        selectedChannel = m.top.channels[rowIndex]
         LogInfo("CHANNELLIST", "Channel selected: " + selectedChannel.title)
         
         ' Set the selected channel field (parent can observe this)
@@ -119,6 +144,8 @@ sub OnChannelSelected()
         
         ' TODO: Navigate to video player
         PlayChannel(selectedChannel)
+    else
+        LogInfo("CHANNELLIST", "Invalid row index: " + Str(rowIndex))
     end if
 end sub
 
@@ -126,12 +153,17 @@ sub PlayChannel(channel as object)
     LogInfo("CHANNELLIST", "Playing channel: " + channel.title)
     
     ' TODO: Implement video player navigation
-    ' For now, just show a message
+    ' For now, just show a simple message dialog
+    ' Note: Creating Dialog on m.top instead of GetScene()
     dialog = CreateObject("roSGNode", "Dialog")
     dialog.title = "Play Channel"
-    dialog.message = "Now playing: " + channel.title + Chr(10) + "Stream: " + channel.streamUrl
+    dialog.message = "Now playing: " + channel.title
     dialog.buttons = ["OK"]
-    m.top.GetScene().dialog = dialog
+    
+    ' Show the dialog
+    m.top.GetParent().GetScene().dialog = dialog
+    
+    LogInfo("CHANNELLIST", "Dialog should be displayed")
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean

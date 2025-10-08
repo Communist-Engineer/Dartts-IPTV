@@ -27,10 +27,14 @@
             rowHeights="[90]"
             rowItemSize="[[1800,90]]"
             rowItemSpacing="[[0,5]]"
+            itemComponentName="ChannelListItem"
+            drawFocusFeedback="true"
+            drawFocusFeedbackOnTop="false"
             visible="true"
             focusable="true"
-            vertFocusAnimationStyle="floatingFocus"
-            showRowLabel="false" />
+            vertFocusAnimationStyle="fixedFocusWrap"
+            showRowLabel="false"
+            showRowCounter="false" />
         
         <!-- No Channels Message -->
         <Label id="emptyMessage" 

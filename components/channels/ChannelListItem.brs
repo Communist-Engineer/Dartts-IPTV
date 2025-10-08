@@ -1,12 +1,22 @@
 sub init()
     ' Get references to UI elements
     m.background = m.top.FindNode("background")
-    m.focusIndicator = m.top.FindNode("focusIndicator")
     m.channelLogo = m.top.FindNode("channelLogo")
     m.numberBadge = m.top.FindNode("numberBadge")
     m.channelNumber = m.top.FindNode("channelNumber")
     m.channelTitle = m.top.FindNode("channelTitle")
     m.channelGroup = m.top.FindNode("channelGroup")
+    
+    ' Explicitly set colors to ensure visibility
+    if m.channelTitle <> invalid then
+        m.channelTitle.color = "0xFFFFFFFF"
+    end if
+    if m.channelGroup <> invalid then
+        m.channelGroup.color = "0xCCCCCCFF"
+    end if
+    if m.channelNumber <> invalid then
+        m.channelNumber.color = "0xFFFFFFFF"
+    end if
 end sub
 
 sub OnContentChanged()
@@ -40,20 +50,5 @@ sub OnContentChanged()
     else
         m.channelLogo.visible = false
         m.numberBadge.visible = true
-    end if
-end sub
-
-sub OnFocusPercentChanged()
-    ' Animate focus indicator based on focus percentage (0.0 to 1.0)
-    focusPercent = m.top.focusPercent
-    
-    ' Fade in/out the focus indicator
-    m.focusIndicator.opacity = focusPercent * 0.5
-    
-    ' Slightly scale the background when focused
-    if focusPercent > 0.5 then
-        m.background.color = "0x2A2A2AFF"
-    else
-        m.background.color = "0x1A1A1AFF"
     end if
 end sub
