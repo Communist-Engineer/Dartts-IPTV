@@ -1,3 +1,22 @@
+' ============================
+' Logger Helper Functions
+' ============================
+sub LogDebug(tag as string, message as string)
+    print "[DEBUG] [" + tag + "] " + message
+end sub
+
+sub LogInfo(tag as string, message as string)
+    print "[INFO] [" + tag + "] " + message
+end sub
+
+sub LogWarn(tag as string, message as string)
+    print "[WARN] [" + tag + "] " + message
+end sub
+
+sub LogError(tag as string, message as string)
+    print "[ERROR] [" + tag + "] " + message
+end sub
+
 sub init()
     LogInfo("CHANNELLIST", "Initializing Channel List Scene")
     m.titleLabel = m.top.FindNode("titleLabel")
