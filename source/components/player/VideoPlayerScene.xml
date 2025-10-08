@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="VideoPlayerScene" extends="Group">
+    <interface>
+        <field id="channel" type="assocarray" alwaysNotify="true" />
+        <field id="closeRequested" type="boolean" alwaysNotify="true" />
+    </interface>
+    <children>
+        <Video id="videoNode" translation="[0,0]" width="1920" height="1080" />
+        <PlayerOverlay id="playerOverlay" translation="[0,0]" />
+        <Rectangle id="loadingBg" translation="[0,0]" width="1920" height="1080" color="0x000000FF" visible="false" />
+        <Label id="loadingLabel" translation="[860,520]" font="font:LargeBoldSystemFont" text="Loading..." visible="false" />
+        <Label id="errorLabel" translation="[660,520]" font="font:MediumBoldSystemFont" text="" color="0xFF0000FF" visible="false" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/components/player/VideoPlayerScene.brs" entry="VideoPlayerSceneInit" />
+</component>

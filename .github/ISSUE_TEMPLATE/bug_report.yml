@@ -1,0 +1,89 @@
+name: Bug Report
+description: Report a bug or crash in Dartt's IPTV
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below.
+        
+  - type: input
+    id: roku-model
+    attributes:
+      label: Roku Device Model
+      description: What Roku device are you using?
+      placeholder: e.g., Roku Streaming Stick 4K, Roku TV
+    validations:
+      required: true
+      
+  - type: input
+    id: roku-os
+    attributes:
+      label: Roku OS Version
+      description: Go to Settings → System → About
+      placeholder: e.g., 12.5.0
+    validations:
+      required: true
+      
+  - type: input
+    id: app-version
+    attributes:
+      label: App Version
+      description: What version of Dartt's IPTV?
+      placeholder: e.g., 1.0.0
+    validations:
+      required: true
+      
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear description of what the bug is
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+      
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+      
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+      
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+    validations:
+      required: true
+      
+  - type: textarea
+    id: logs
+    attributes:
+      label: Debug Console Output
+      description: If applicable, paste output from telnet console
+      placeholder: telnet ROKU_IP 8085
+      render: shell
+      
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other information that might be helpful
+      placeholder: Screenshots, playlist URL format, network setup, etc.

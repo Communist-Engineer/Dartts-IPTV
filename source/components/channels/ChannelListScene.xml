@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="ChannelListScene" extends="Group">
+    <interface>
+        <field id="channels" type="array" alwaysNotify="true" />
+        <field id="title" type="string" alwaysNotify="true" />
+    </interface>
+    <children>
+        <Label id="titleLabel" translation="[60,60]" font="font:LargeBoldSystemFont" text="Channels" />
+        <Label id="placeholderLabel" translation="[60,140]" font="font:MediumSystemFont" text="Channel list will appear here." />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/components/channels/ChannelListScene.brs" entry="ChannelListSceneInit" />
+</component>

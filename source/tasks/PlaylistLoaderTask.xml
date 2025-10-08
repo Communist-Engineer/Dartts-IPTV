@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="PlaylistLoaderTask" extends="Task">
+    <interface>
+        <field id="playlistUrls" type="array" />
+        <field id="result" type="assocarray" />
+        <field id="status" type="string" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/source/tasks/PlaylistLoaderTask.brs" entry="PlaylistLoaderTaskRun" />
+</component>

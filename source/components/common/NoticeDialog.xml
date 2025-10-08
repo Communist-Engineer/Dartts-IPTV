@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="NoticeDialog" extends="Dialog">
+    <interface>
+        <field id="message" type="string" alwaysNotify="true" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/source/components/common/NoticeDialog.brs" entry="NoticeDialogInit" />
+</component>

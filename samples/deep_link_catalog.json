@@ -1,0 +1,48 @@
+{
+  "providerName": "Dartt's IPTV",
+  "lastUpdated": "2025-10-07T12:00:00Z",
+  "language": "en",
+  "movies": [],
+  "series": [],
+  "shortFormVideos": [],
+  "tvSpecials": [],
+  "playlists": [],
+  "liveFeeds": [
+    {
+      "id": "sample_test1",
+      "title": "Test Channel HD",
+      "content": {
+        "dateAdded": "2025-10-07T12:00:00Z",
+        "videos": [
+          {
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "quality": "HD",
+            "videoType": "HLS"
+          }
+        ],
+        "duration": 0
+      },
+      "thumbnail": "https://example.com/logo1.png",
+      "genres": ["entertainment"],
+      "tags": ["sample", "test"]
+    },
+    {
+      "id": "sample_test2",
+      "title": "Sample News Network",
+      "content": {
+        "dateAdded": "2025-10-07T12:00:00Z",
+        "videos": [
+          {
+            "url": "https://cph-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+            "quality": "HD",
+            "videoType": "HLS"
+          }
+        ],
+        "duration": 0
+      },
+      "thumbnail": "https://example.com/logo2.png",
+      "genres": ["news"],
+      "tags": ["sample", "news"]
+    }
+  ]
+}

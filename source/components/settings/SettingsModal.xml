@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="SettingsModal" extends="Group">
+    <interface>
+        <field id="settings" type="assocarray" alwaysNotify="true" />
+    </interface>
+    <children>
+        <Rectangle id="modalBg" translation="[360,180]" width="1200" height="720" color="0x10131acc" />
+        <Label id="header" translation="[420,240]" font="font:LargeBoldSystemFont" text="Settings" />
+        <Label id="body" translation="[420,320]" font="font:MediumSystemFont" text="Settings UI under construction" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/components/settings/SettingsModal.brs" entry="SettingsModalInit" />
+</component>

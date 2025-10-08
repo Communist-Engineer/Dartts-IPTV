@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="PlayerOverlay" extends="Group">
+    <interface>
+        <field id="channel" type="assocarray" alwaysNotify="true" />
+        <field id="showInfo" type="boolean" alwaysNotify="true" value="false" />
+    </interface>
+    <children>
+        <Rectangle id="background" translation="[0,0]" width="1920" height="1080" color="0x00000040" visible="false" />
+        <Label id="titleLabel" translation="[80,920]" font="font:MediumBoldSystemFont" text="" />
+        <Label id="groupLabel" translation="[80,970]" font="font:SmallSystemFont" text="" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/source/components/player/PlayerOverlay.brs" entry="PlayerOverlayInit" />
+</component>

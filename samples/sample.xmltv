@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tv SYSTEM "xmltv.dtd">
+<tv generator-info-name="Sample XMLTV" generator-info-url="https://github.com">
+  <channel id="test1">
+    <display-name>Test Channel HD</display-name>
+    <icon src="https://example.com/logo1.png" />
+  </channel>
+  <channel id="test2">
+    <display-name>Sample News Network</display-name>
+    <icon src="https://example.com/logo2.png" />
+  </channel>
+  <channel id="test3">
+    <display-name>Demo Sports Channel</display-name>
+    <icon src="https://example.com/logo3.png" />
+  </channel>
+  <programme start="20251007120000 +0000" stop="20251007140000 +0000" channel="test1">
+    <title>Morning Show</title>
+    <sub-title>Episode 42</sub-title>
+    <desc>A great morning show with entertainment and news.</desc>
+    <category>Entertainment</category>
+  </programme>
+  <programme start="20251007140000 +0000" stop="20251007160000 +0000" channel="test1">
+    <title>Afternoon Movie</title>
+    <desc>Classic cinema presentation.</desc>
+    <category>Movies</category>
+  </programme>
+  <programme start="20251007120000 +0000" stop="20251007130000 +0000" channel="test2">
+    <title>News Hour</title>
+    <desc>Breaking news and analysis.</desc>
+    <category>News</category>
+  </programme>
+  <programme start="20251007130000 +0000" stop="20251007140000 +0000" channel="test2">
+    <title>World Report</title>
+    <desc>International news coverage.</desc>
+    <category>News</category>
+  </programme>
+  <programme start="20251007120000 +0000" stop="20251007150000 +0000" channel="test3">
+    <title>Live Sports Event</title>
+    <desc>Exciting sports action.</desc>
+    <category>Sports</category>
+  </programme>
+</tv>
