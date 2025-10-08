@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="TestTask" extends="Task">
+    <interface>
+        <field id="status" type="string" />
+    </interface>
+    <script type="text/brightscript"><![CDATA[
+        sub init()
+            print "TestTask init"
+        end sub
+    ]]></script>
+</component>

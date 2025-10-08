@@ -18,7 +18,7 @@ sub PlaylistLoaderTaskRun()
     allErrors = []
     
     for each url in urls
-        LogInfo("PlaylistLoader", "Fetching playlist: " + url)
+        print "[INFO] [PlaylistLoader] Fetching playlist: " + url
         
         response = FetchTextResource(url, {
             timeout: 15000,
@@ -27,7 +27,7 @@ sub PlaylistLoaderTaskRun()
         })
         
         if response.success then
-            LogInfo("PlaylistLoader", "Parsing M3U content")
+            print "[INFO] [PlaylistLoader] Parsing M3U content"
             parsed = ParseM3U(response.body)
             
             if parsed.errors.Count() > 0 then
@@ -54,7 +54,7 @@ sub PlaylistLoaderTaskRun()
                 errorMsg = errorMsg + ": " + response.error
             end if
             allErrors.Push(errorMsg)
-            LogError("PlaylistLoader", errorMsg)
+            print "[ERROR] [PlaylistLoader] " + errorMsg
         end if
     end for
     
@@ -70,5 +70,5 @@ sub PlaylistLoaderTaskRun()
         m.top.status = "complete"
     end if
     
-    LogInfo("PlaylistLoader", "Loaded " + Str(allChannels.Count()) + " channels")
+    print "[INFO] [PlaylistLoader] Loaded " + Str(allChannels.Count()) + " channels"
 end sub

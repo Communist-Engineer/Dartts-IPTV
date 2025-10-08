@@ -14,10 +14,10 @@ sub Main()
     ' placeholder for initializing persistent storage/config
     InitializeAppConfig()
 
-    scene = screen.CreateScene("MainScene")
+    scene = screen.CreateScene("AppScene")
     ' Note: CreateScene automatically sets the scene, but we keep the reference for potential future use
     if scene = invalid then
-        print "ERROR: Failed to create MainScene"
+        print "ERROR: Failed to create AppScene"
         return
     end if
     

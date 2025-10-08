@@ -3,5 +3,5 @@
     <interface>
         <field id="message" type="string" alwaysNotify="true" />
     </interface>
-    <script type="text/brightscript" uri="pkg:/source/components/common/NoticeDialog.brs" entry="NoticeDialogInit" />
+    <script type="text/brightscript" uri="pkg:/components/common/NoticeDialog.brs" entry="NoticeDialogInit" />
 </component>

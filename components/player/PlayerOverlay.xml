@@ -9,5 +9,5 @@
         <Label id="titleLabel" translation="[80,920]" font="font:MediumBoldSystemFont" text="" />
         <Label id="groupLabel" translation="[80,970]" font="font:SmallSystemFont" text="" />
     </children>
-    <script type="text/brightscript" uri="pkg:/source/components/player/PlayerOverlay.brs" entry="PlayerOverlayInit" />
+    <script type="text/brightscript" uri="pkg:/components/player/PlayerOverlay.brs" entry="PlayerOverlayInit" />
 </component>

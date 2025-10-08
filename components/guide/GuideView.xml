@@ -7,5 +7,5 @@
         <Label id="header" translation="[60,60]" font="font:LargeBoldSystemFont" text="Guide" />
         <Label id="status" translation="[60,140]" font="font:MediumSystemFont" text="EPG loading..." />
     </children>
-    <script type="text/brightscript" uri="pkg:/source/components/guide/GuideView.brs" entry="GuideViewInit" />
+    <script type="text/brightscript" uri="pkg:/components/guide/GuideView.brs" entry="GuideViewInit" />
 </component>

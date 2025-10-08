@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="SettingsModal" extends="Group">
+    <interface>
+        <field id="closed" type="boolean" alwaysNotify="true" />
+    </interface>
+    
+    <children>
+        <!-- Background overlay -->
+        <Rectangle id="overlay"
+                   translation="[0,0]"
+                   width="1920"
+                   height="1080"
+                   color="0x000000CC" />
+        
+        <!-- Modal container -->
+        <Rectangle id="modalBackground"
+                   translation="[460,190]"
+                   width="1000"
+                   height="700"
+                   color="0x202020FF">
+            <children>
+                <!-- Title -->
+                <Label id="titleLabel"
+                       translation="[40,40]"
+                       font="font:LargeBoldSystemFont"
+                       color="0xEEEEEEFF"
+                       text="Settings" />
+                
+                <!-- Settings options list -->
+                <Group id="optionsList" translation="[40,120]">
+                    <Rectangle id="addPlaylistOption"
+                              translation="[0,0]"
+                              width="920"
+                              height="80"
+                              color="0x303030FF"
+                              focusable="true">
+                        <children>
+                            <Label translation="[20,25]"
+                                   font="font:MediumBoldSystemFont"
+                                   color="0xEEEEEEFF"
+                                   text="Add Playlist" />
+                        </children>
+                    </Rectangle>
+                    
+                    <Rectangle id="managePlistsOption"
+                              translation="[0,90]"
+                              width="920"
+                              height="80"
+                              color="0x303030FF"
+                              focusable="true">
+                        <children>
+                            <Label translation="[20,25]"
+                                   font="font:MediumBoldSystemFont"
+                                   color="0xEEEEEEFF"
+                                   text="Manage Playlists" />
+                        </children>
+                    </Rectangle>
+                    
+                    <Rectangle id="clearCacheOption"
+                              translation="[0,180]"
+                              width="920"
+                              height="80"
+                              color="0x303030FF"
+                              focusable="true">
+                        <children>
+                            <Label translation="[20,25]"
+                                   font="font:MediumBoldSystemFont"
+                                   color="0xEEEEEEFF"
+                                   text="Clear Cache" />
+                        </children>
+                    </Rectangle>
+                    
+                    <Rectangle id="aboutOption"
+                              translation="[0,270]"
+                              width="920"
+                              height="80"
+                              color="0x303030FF"
+                              focusable="true">
+                        <children>
+                            <Label translation="[20,25]"
+                                   font="font:MediumBoldSystemFont"
+                                   color="0xEEEEEEFF"
+                                   text="About" />
+                        </children>
+                    </Rectangle>
+                    
+                    <Rectangle id="closeOption"
+                              translation="[0,360]"
+                              width="920"
+                              height="80"
+                              color="0x404040FF"
+                              focusable="true">
+                        <children>
+                            <Label translation="[20,25]"
+                                   font="font:MediumBoldSystemFont"
+                                   color="0xEEEEEEFF"
+                                   text="Close" />
+                        </children>
+                    </Rectangle>
+                </Group>
+                
+                <!-- Focus indicator -->
+                <Rectangle id="focusIndicator"
+                           translation="[40,120]"
+                           width="920"
+                           height="80"
+                           color="0x00000000">
+                    <children>
+                        <Rectangle translation="[0,0]" width="920" height="3" color="0x6D4C91FF" />
+                        <Rectangle translation="[0,0]" width="3" height="80" color="0x6D4C91FF" />
+                        <Rectangle translation="[917,0]" width="3" height="80" color="0x6D4C91FF" />
+                        <Rectangle translation="[0,77]" width="920" height="3" color="0x6D4C91FF" />
+                    </children>
+                </Rectangle>
+            </children>
+        </Rectangle>
+    </children>
+    
+    <script type="text/brightscript" uri="pkg:/components/settings/SettingsModal.brs" />
+</component>

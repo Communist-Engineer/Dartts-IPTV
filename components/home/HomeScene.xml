@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="HomeScene" extends="Group">
+    <interface>
+        <field id="launchArgs" type="assocarray" alwaysNotify="true" />
+        <field id="dialog" type="node" alwaysNotify="true" />
+    </interface>
+    
+    <children>
+        <!-- Background -->
+        <Rectangle id="background" translation="[0,0]" width="1920" height="1080" color="0x101010FF" />
+        
+        <!-- Title and subtitle -->
+        <Label id="title" 
+               translation="[60,50]" 
+               font="font:LargeBoldSystemFont" 
+               color="0xEEEEEEFF"
+               text="Dartt's IPTV" />
+        
+        <Label id="subtitle" 
+               translation="[60,110]" 
+               font="font:MediumSystemFont" 
+               color="0xAAAAAAAA"
+               text="Loading..." />
+        
+        <!-- Error banner (initially hidden) -->
+        <Rectangle id="errorBanner"
+                   translation="[60,170]"
+                   width="1800"
+                   height="80"
+                   color="0x880000FF"
+                   visible="false">
+            <Label id="errorMessage"
+                   translation="[20,15]"
+                   width="1760"
+                   height="50"
+                   font="font:MediumSystemFont"
+                   color="0xFFFFFFFF"
+                   wrap="true"
+                   text="" />
+        </Rectangle>
+        
+        <!-- Loading indicator (initially hidden) -->
+        <Label id="loadingIndicator"
+               translation="[920,300]"
+               visible="false"
+               font="font:MediumSystemFont"
+               color="0xEEEEEEFF"
+               text="Loading..." />
+        
+        <!-- Main menu container with direct button children -->
+        <Group id="menuContainer" translation="[60,280]">
+            <!-- Row 1: Main actions -->
+            <Rectangle id="addPlaylistButton"
+                      translation="[0,0]"
+                      width="400"
+                      height="200"
+                      color="0x202020FF"
+                      focusable="true">
+                    <Label id="addPlaylistTitle"
+                           translation="[20,70]"
+                           font="font:LargeBoldSystemFont"
+                           color="0xEEEEEEFF"
+                           text="Add Playlist" />
+                    <Label id="addPlaylistSubtitle"
+                           translation="[20,120]"
+                           font="font:SmallSystemFont"
+                           color="0xAAAAAAAA"
+                           text="Add M3U URL" />
+            </Rectangle>
+            
+            <Rectangle id="playlistsButton"
+                      translation="[430,0]"
+                      width="400"
+                      height="200"
+                      color="0x202020FF"
+                      focusable="true">
+                    <Label id="playlistsTitle"
+                           translation="[20,70]"
+                           font="font:LargeBoldSystemFont"
+                           color="0xEEEEEEFF"
+                           text="Playlists" />
+                    <Label id="playlistsCount"
+                           translation="[20,120]"
+                           font="font:SmallSystemFont"
+                           color="0xAAAAAAAA"
+                           text="0 configured" />
+            </Rectangle>
+            
+            <Rectangle id="allChannelsButton"
+                      translation="[860,0]"
+                      width="400"
+                      height="200"
+                      color="0x202020FF"
+                      focusable="true">
+                    <Label id="allChannelsTitle"
+                           translation="[20,70]"
+                           font="font:LargeBoldSystemFont"
+                           color="0xEEEEEEFF"
+                           text="All Channels" />
+                    <Label id="allChannelsCount"
+                           translation="[20,120]"
+                           font="font:SmallSystemFont"
+                           color="0xAAAAAAAA"
+                           text="0 channels" />
+            </Rectangle>
+            
+            <Rectangle id="groupsButton"
+                      translation="[1290,0]"
+                      width="400"
+                      height="200"
+                      color="0x202020FF"
+                      focusable="true">
+                    <Label id="groupsTitle"
+                           translation="[20,70]"
+                           font="font:LargeBoldSystemFont"
+                           color="0xEEEEEEFF"
+                           text="Groups" />
+                    <Label id="groupsCount"
+                           translation="[20,120]"
+                           font="font:SmallSystemFont"
+                           color="0xAAAAAAAA"
+                           text="0 groups" />
+            </Rectangle>
+            
+            <!-- Row 2: Secondary actions -->
+            <Rectangle id="favoritesButton"
+                      translation="[0,230]"
+                      width="400"
+                      height="200"
+                      color="0x202020FF"
+                      focusable="true">
+                        <Label id="favoritesTitle"
+                               translation="[20,70]"
+                               font="font:LargeBoldSystemFont"
+                               color="0xEEEEEEFF"
+                               text="Favorites" />
+                        <Label id="favoritesCount"
+                               translation="[20,120]"
+                               font="font:SmallSystemFont"
+                               color="0xAAAAAAAA"
+                               text="0 favorites" />
+                </Rectangle>
+                
+                <Rectangle id="recentsButton"
+                          translation="[430,230]"
+                          width="400"
+                          height="200"
+                          color="0x202020FF"
+                          focusable="true">
+                        <Label id="recentsTitle"
+                               translation="[20,70]"
+                               font="font:LargeBoldSystemFont"
+                               color="0xEEEEEEFF"
+                               text="Recents" />
+                        <Label id="recentsCount"
+                               translation="[20,120]"
+                               font="font:SmallSystemFont"
+                               color="0xAAAAAAAA"
+                               text="0 recent" />
+                </Rectangle>
+                
+                <Rectangle id="guideButton"
+                          translation="[860,230]"
+                          width="400"
+                          height="200"
+                          color="0x202020FF"
+                          focusable="true">
+                        <Label id="guideTitle"
+                               translation="[20,70]"
+                               font="font:LargeBoldSystemFont"
+                               color="0xEEEEEEFF"
+                               text="Guide" />
+                        <Label id="guideSubtitle"
+                               translation="[20,120]"
+                               font="font:SmallSystemFont"
+                               color="0xAAAAAAAA"
+                               text="Program guide" />
+                </Rectangle>
+                
+                <Rectangle id="settingsButton"
+                          translation="[1290,230]"
+                          width="400"
+                          height="200"
+                          color="0x202020FF"
+                          focusable="true">
+                        <Label id="settingsTitle"
+                               translation="[20,70]"
+                               font="font:LargeBoldSystemFont"
+                               color="0xEEEEEEFF"
+                               text="Settings" />
+                        <Label id="settingsSubtitle"
+                               translation="[20,120]"
+                               font="font:SmallSystemFont"
+                               color="0xAAAAAAAA"
+                               text="Configure app" />
+                </Rectangle>
+        </Group>
+        
+        <!-- Focus indicator overlay (follows focused item) -->
+        <Rectangle id="focusIndicator"
+                   translation="[60,280]"
+                   width="400"
+                   height="200"
+                   color="0x00000000"
+                   visible="true">
+                <Rectangle translation="[0,0]" width="400" height="4" color="0x6D4C91FF" />
+                <Rectangle translation="[0,0]" width="4" height="200" color="0x6D4C91FF" />
+                <Rectangle translation="[396,0]" width="4" height="200" color="0x6D4C91FF" />
+                <Rectangle translation="[0,196]" width="400" height="4" color="0x6D4C91FF" />
+        </Rectangle>
+        
+        <!-- Help text at bottom -->
+        <Label id="helpLabel"
+               translation="[60,980]"
+               font="font:SmallSystemFont"
+               color="0x808080FF"
+               text="Navigate with arrow keys | OK to select | Back to exit" />
+    </children>
+    
+    <script type="text/brightscript" uri="pkg:/components/home/HomeScene.brs" />
+</component>

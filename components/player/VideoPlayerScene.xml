@@ -11,5 +11,5 @@
         <Label id="loadingLabel" translation="[860,520]" font="font:LargeBoldSystemFont" text="Loading..." visible="false" />
         <Label id="errorLabel" translation="[660,520]" font="font:MediumBoldSystemFont" text="" color="0xFF0000FF" visible="false" />
     </children>
-    <script type="text/brightscript" uri="pkg:/source/components/player/VideoPlayerScene.brs" entry="VideoPlayerSceneInit" />
+    <script type="text/brightscript" uri="pkg:/components/player/VideoPlayerScene.brs" entry="VideoPlayerSceneInit" />
 </component>

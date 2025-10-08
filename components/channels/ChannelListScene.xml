@@ -8,5 +8,5 @@
         <Label id="titleLabel" translation="[60,60]" font="font:LargeBoldSystemFont" text="Channels" />
         <Label id="placeholderLabel" translation="[60,140]" font="font:MediumSystemFont" text="Channel list will appear here." />
     </children>
-    <script type="text/brightscript" uri="pkg:/source/components/channels/ChannelListScene.brs" entry="ChannelListSceneInit" />
+    <script type="text/brightscript" uri="pkg:/components/channels/ChannelListScene.brs" />
 </component>
