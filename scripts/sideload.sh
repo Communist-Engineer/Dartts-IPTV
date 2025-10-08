@@ -21,7 +21,7 @@ cd "$BUILD_DIR" && zip -r "$TMP_ZIP" . -q
 
 # Delete existing dev channel
 echo "Removing existing dev channel..."
-curl -s -S -u "$ROKU_USER:$ROKU_PASS" \
+curl -s -S --digest -u "$ROKU_USER:$ROKU_PASS" \
     -F "mysubmit=Delete" \
     -F "archive=" \
     "http://$ROKU_IP/plugin_install" > /dev/null
@@ -30,7 +30,7 @@ sleep 2
 
 # Install new channel
 echo "Installing channel..."
-RESPONSE=$(curl -s -S -u "$ROKU_USER:$ROKU_PASS" \
+RESPONSE=$(curl -s -S --digest -u "$ROKU_USER:$ROKU_PASS" \
     -F "mysubmit=Install" \
     -F "archive=@$TMP_ZIP" \
     "http://$ROKU_IP/plugin_install")
