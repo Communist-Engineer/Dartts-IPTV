@@ -53,6 +53,14 @@ elif echo "$RESPONSE" | grep -q "Identical to previous version"; then
     echo "✓ Channel already up to date"
 else
     echo "❌ Installation failed"
-    echo "$RESPONSE" | grep -i "error" || echo "Unknown error"
+    echo ""
+    echo "Response from Roku:"
+    echo "$RESPONSE"
+    echo ""
+    echo "Common issues:"
+    echo "  - Wrong password (check ROKU_PASS environment variable)"
+    echo "  - Developer mode not enabled on Roku"
+    echo "  - Roku IP address incorrect"
+    echo ""
     exit 1
 fi
