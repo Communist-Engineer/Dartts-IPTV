@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<component name="HomeScene" extends="Group">
+<component name="HomeScene" extends="Scene">
     <interface>
         <field id="launchArgs" type="assocarray" alwaysNotify="true" />
     </interface>
@@ -7,5 +7,12 @@
         <Label id="titleLabel" text="Dartt's IPTV" translation="[60,60]" font="font:LargeBoldSystemFont"/>
         <Label id="subtitleLabel" text="Loading playlists..." translation="[60,140]" font="font:MediumSystemFont"/>
     </children>
-    <script type="text/brightscript" uri="pkg:/source/components/home/HomeScene.brs" entry="HomeSceneInit" />
+    <script type="text/brightscript" uri="pkg:/source/components/home/HomeScene.brs" />
+    <script type="text/brightscript">
+        <![CDATA[
+        sub init()
+            HomeScene_init()
+        end sub
+        ]]>
+    </script>
 </component>

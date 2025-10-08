@@ -14,10 +14,7 @@ sub Main()
     ' placeholder for initializing persistent storage/config
     InitializeAppConfig()
 
-    scene = screen.CreateScene("AppScene")
-    ' Set launch args on the scene (field is defined in AppScene.xml)
-    scene.launchArgs = GetDeepLinkArgs()
-
+    scene = screen.CreateScene("MainScene")
     screen.SetRoot(scene)
     screen.Show()
 
@@ -30,13 +27,8 @@ sub Main()
 end sub
 
 function GetDeepLinkArgs() as object
-    launchParams = CreateObject("roInput")
-    if launchParams <> invalid then
-        inputData = launchParams.GetMessage()
-        if type(inputData) = "roAssociativeArray" then
-            return inputData
-        end if
-    end if
+    ' Deep linking arguments will be passed to the scene via roAppManager
+    ' For now, return empty object - we'll handle deep links via the scene's launch event
     return {}
 end function
 

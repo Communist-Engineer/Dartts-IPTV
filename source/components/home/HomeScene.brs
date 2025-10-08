@@ -1,5 +1,5 @@
-sub HomeSceneInit()
-    m.top.ObserveField("launchArgs", "HomeSceneOnLaunchArgsChanged")
+sub HomeScene_init()
+    m.top.ObserveField("launchArgs", "HomeScene_onLaunchArgsChanged")
     m.subtitleLabel = m.top.FindNode("subtitleLabel")
     m.titleLabel = m.top.FindNode("titleLabel")
     
@@ -10,7 +10,7 @@ sub HomeSceneInit()
     LoadPlaylistsAndChannels()
 end sub
 
-sub HomeSceneOnLaunchArgsChanged()
+sub HomeScene_onLaunchArgsChanged()
     args = m.top.launchArgs
     if args <> invalid and args.contentId <> invalid then
         m.subtitleLabel.text = "Deep linking to content " + args.contentId

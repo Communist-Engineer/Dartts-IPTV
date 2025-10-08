@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MainScene" extends="Scene">
+    <children>
+        <Label id="titleLabel" text="Dartt's IPTV" translation="[60,60]" font="font:LargeBoldSystemFont" color="0xFFFFFF"/>
+        <Label id="subtitleLabel" text="Ready! Add playlists in Settings." translation="[60,140]" font="font:MediumSystemFont" color="0xCCCCCC"/>
+    </children>
+    <script type="text/brightscript">
+        <![CDATA[
+        sub init()
+            m.titleLabel = m.top.FindNode("titleLabel")
+            m.subtitleLabel = m.top.FindNode("subtitleLabel")
+        end sub
+        ]]>
+    </script>
+</component>

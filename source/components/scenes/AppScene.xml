@@ -6,5 +6,5 @@
     <children>
         <HomeScene id="homeScene" visible="true" />
     </children>
-    <script type="text/brightscript" uri="pkg:/source/AppScene.brs" entry="AppSceneInit" />
+    <script type="text/brightscript" uri="pkg:/source/components/scenes/AppScene.brs" />
 </component>
