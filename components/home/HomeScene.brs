@@ -47,7 +47,7 @@ function LoadSettings() as object
     ' Load from registry
     playlistsData = registry.Read("playlists")
     if playlistsData <> invalid and playlistsData <> "" then
-        settings.playlists = DeserializeArray(playlistsData)
+        settings.playlists = DeserializePlaylistArray(playlistsData)
     end if
     
     favoritesData = registry.Read("favorites")
@@ -86,7 +86,7 @@ sub SaveSettings(settings as object)
     registry = GetAppRegistry()
     
     if settings.playlists <> invalid then
-        registry.Write("playlists", SerializeArray(settings.playlists))
+        registry.Write("playlists", SerializePlaylistArray(settings.playlists))
     end if
     
     if settings.favorites <> invalid then
@@ -161,11 +161,70 @@ function StrReplace(source as string, find as string, replace as string) as stri
     return source.Replace(find, replace)
 end function
 
+' Playlist serialization functions
+function SerializePlaylistArray(playlists as object) as string
+    if playlists = invalid or playlists.Count() = 0 then return ""
+    result = ""
+    for i = 0 to playlists.Count() - 1
+        if i > 0 then result = result + "||"
+        playlist = playlists[i]
+        
+        ' Handle both old string format and new object format
+        if Type(playlist) = "roString" or Type(playlist) = "String" then
+            ' Old format: just URL
+            result = result + StrReplace(playlist, "|", "^PIPE^") + "|"
+        else
+            ' New format: {url: "", epgUrl: ""}
+            url = ""
+            epgUrl = ""
+            if playlist.DoesExist("url") then url = playlist.url
+            if playlist.DoesExist("epgUrl") then epgUrl = playlist.epgUrl
+            result = result + StrReplace(url, "|", "^PIPE^") + "|" + StrReplace(epgUrl, "|", "^PIPE^")
+        end if
+    end for
+    return result
+end function
+
+function DeserializePlaylistArray(data as string) as object
+    if data = invalid or data = "" then return []
+    parts = data.Split("||")
+    result = []
+    for each part in parts
+        subparts = part.Split("|")
+        if subparts.Count() >= 1 then
+            playlist = {
+                url: StrReplace(subparts[0], "^PIPE^", "|"),
+                epgUrl: ""
+            }
+            if subparts.Count() >= 2 then
+                playlist.epgUrl = StrReplace(subparts[1], "^PIPE^", "|")
+            end if
+            result.Push(playlist)
+        end if
+    end for
+    return result
+end function
+
 ' ============================
 ' Component Initialization
 ' ============================
 sub init()
     LogInfo("HOME", "Initializing Home Scene")
+    
+    ' Get device display resolution
+    deviceInfo = CreateObject("roDeviceInfo")
+    displaySize = deviceInfo.GetDisplaySize()
+    m.screenWidth = displaySize.w
+    m.screenHeight = displaySize.h
+    
+    LogInfo("HOME", "Device resolution: " + Str(m.screenWidth) + "x" + Str(m.screenHeight))
+    
+    ' Update background to match screen size
+    background = m.top.FindNode("background")
+    if background <> invalid then
+        background.width = m.screenWidth
+        background.height = m.screenHeight
+    end if
     
     ' Cache node references for performance
     m.title = m.top.FindNode("title")
@@ -255,10 +314,15 @@ sub init()
         {button: m.settingsButton, row: 1, col: 3, id: "settings"}
     ]
     
+    ' Apply dynamic layout based on screen resolution
+    ApplyDynamicLayout()
+    
     ' State management
     m.currentFocusIndex = 0
     m.channels = []
     m.groups = {}
+    m.epgData = invalid
+    m.categorizedPrograms = invalid
     m.settings = invalid
     m.isLoading = false
     
@@ -275,6 +339,64 @@ sub init()
     SetFocusToMenuItem(0)
     
     LogInfo("HOME", "Home Scene initialized")
+end sub
+
+sub ApplyDynamicLayout()
+    ' Calculate dynamic tile layout based on screen resolution
+    ' Tile size and spacing
+    tileWidth = 400
+    tileHeight = 200
+    horizontalSpacing = 30
+    verticalSpacing = 30
+    leftMargin = 60
+    topMargin = 280
+    
+    ' Calculate how many columns fit based on screen width
+    ' Formula: (screenWidth - leftMargin - rightMargin) / (tileWidth + spacing)
+    availableWidth = m.screenWidth - (leftMargin * 2)
+    maxColumns = Int(availableWidth / (tileWidth + horizontalSpacing))
+    
+    ' Ensure at least 3 columns and max 4 for good UX
+    if maxColumns < 3 then maxColumns = 3
+    if maxColumns > 4 then maxColumns = 4
+    
+    LogInfo("HOME", "Calculated max columns: " + Str(maxColumns) + " for screen width: " + Str(m.screenWidth))
+    
+    ' Position all menu tiles dynamically
+    menuContainer = m.top.FindNode("menuContainer")
+    if menuContainer <> invalid then
+        menuContainer.translation = [leftMargin, topMargin]
+    end if
+    
+    for each item in m.menuItems
+        if item.button <> invalid then
+            ' Calculate position based on row and column
+            xPos = item.col * (tileWidth + horizontalSpacing)
+            yPos = item.row * (tileHeight + verticalSpacing)
+            item.button.translation = [xPos, yPos]
+            
+            LogInfo("HOME", "Positioned " + item.id + " at [" + Str(xPos) + "," + Str(yPos) + "]")
+        end if
+    end for
+    
+    ' Update help label position to bottom of screen
+    helpLabel = m.top.FindNode("helpLabel")
+    if helpLabel <> invalid then
+        helpLabel.translation = [leftMargin, m.screenHeight - 100]
+    end if
+    
+    ' Update error banner width
+    if m.errorBanner <> invalid then
+        m.errorBanner.width = m.screenWidth - (leftMargin * 2)
+    end if
+    
+    ' Store layout info for focus indicator
+    m.tileWidth = tileWidth
+    m.tileHeight = tileHeight
+    m.horizontalSpacing = horizontalSpacing
+    m.verticalSpacing = verticalSpacing
+    m.leftMargin = leftMargin
+    m.topMargin = topMargin
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
@@ -385,11 +507,15 @@ sub SetFocusToMenuItem(index as integer)
     ' Skip if button is invalid
     if item.button = invalid then return
     
-    ' Update focus indicator position
+    ' Update focus indicator position using dynamic layout values
     if m.focusIndicator <> invalid then
-        xPos = 60 + (item.col * 430)
-        yPos = 280 + (item.row * 230)
+        xPos = m.leftMargin + (item.col * (m.tileWidth + m.horizontalSpacing))
+        yPos = m.topMargin + (item.row * (m.tileHeight + m.verticalSpacing))
         m.focusIndicator.translation = [xPos, yPos]
+        
+        ' Update focus indicator size to match tile size
+        m.focusIndicator.width = m.tileWidth
+        m.focusIndicator.height = m.tileHeight
     end if
     
     ' Set actual focus
@@ -527,7 +653,20 @@ sub LoadPlaylistsInBackground()
         return
     end if
     
-    m.loaderTask.playlistUrls = m.settings.playlists
+    ' Extract URLs from playlist objects
+    playlistUrls = []
+    for each playlist in m.settings.playlists
+        if Type(playlist) = "roAssociativeArray" then
+            if playlist.DoesExist("url") and playlist.url <> "" then
+                playlistUrls.Push(playlist.url)
+            end if
+        else
+            ' Backward compatibility with old string format
+            playlistUrls.Push(playlist)
+        end if
+    end for
+    
+    m.loaderTask.playlistUrls = playlistUrls
     
     ' Observe task completion
     m.loaderTask.ObserveField("status", "OnPlaylistLoadComplete")
@@ -558,6 +697,9 @@ sub OnPlaylistLoadComplete()
             
             UpdateUI()
             if m.subtitle <> invalid then m.subtitle.text = "Ready - " + Str(m.channels.Count()) + " channels loaded"
+            
+            ' Load EPG data if any playlists have EPG URLs
+            LoadEpgData()
             
             ' Show partial error if any
             if status = "partial" and result.errors.Count() > 0 then
@@ -629,6 +771,83 @@ sub RetryLoad()
     LoadPlaylistsInBackground()
 end sub
 
+sub LoadEpgData()
+    LogInfo("HOME", "LoadEpgData() called")
+    
+    ' Collect all EPG URLs from playlists
+    epgUrls = []
+    for each playlist in m.settings.playlists
+        if Type(playlist) = "roAssociativeArray" and playlist.DoesExist("epgUrl") then
+            if playlist.epgUrl <> "" then
+                LogInfo("HOME", "Found EPG URL: " + playlist.epgUrl)
+                epgUrls.Push(playlist.epgUrl)
+            end if
+        end if
+    end for
+    
+    LogInfo("HOME", "Total EPG URLs found: " + Str(epgUrls.Count()))
+    
+    if epgUrls.Count() = 0 then
+        LogInfo("HOME", "No EPG URLs configured")
+        return
+    end if
+    
+    ' For now, load just the first EPG URL
+    ' TODO: Support multiple EPG sources
+    epgUrl = epgUrls[0]
+    
+    LogInfo("HOME", "Loading EPG from: " + epgUrl)
+    if m.subtitle <> invalid then m.subtitle.text = "Loading guide data..."
+    
+    ' Create EPG loader task
+    m.epgLoaderTask = CreateObject("roSGNode", "EpgLoaderTask")
+    if m.epgLoaderTask = invalid then
+        LogError("HOME", "Failed to create EpgLoaderTask")
+        return
+    end if
+    
+    m.epgLoaderTask.xmltvUrl = epgUrl
+    m.epgLoaderTask.ObserveField("status", "OnEpgLoadComplete")
+    m.epgLoaderTask.control = "RUN"
+    LogInfo("HOME", "EpgLoaderTask started")
+end sub
+
+sub OnEpgLoadComplete()
+    status = m.epgLoaderTask.status
+    LogInfo("HOME", "EPG load completed with status: " + status)
+    
+    if status = "complete" or status = "partial" then
+        result = m.epgLoaderTask.result
+        
+        if result <> invalid then
+            m.epgData = result
+            LogInfo("HOME", "EPG data loaded - " + Str(result.channels.Count()) + " channels, " + Str(result.nowNext.Count()) + " programs")
+            
+            ' Analyze and categorize programs
+            m.categorizedPrograms = AnalyzeAndGroupPrograms(m.epgData, m.channels)
+            
+            ' Count categories
+            categoryCount = 0
+            if m.categorizedPrograms <> invalid and m.categorizedPrograms.categories <> invalid then
+                for each categoryName in m.categorizedPrograms.categories
+                    categoryCount = categoryCount + 1
+                end for
+            end if
+            
+            LogInfo("HOME", "Categorized into " + Str(categoryCount) + " categories")
+            if m.subtitle <> invalid then m.subtitle.text = "Ready - " + Str(m.channels.Count()) + " channels, " + Str(categoryCount) + " guide categories"
+            
+            ' Sleep for 60 seconds to allow testing
+            LogInfo("HOME", "Sleeping for 60 seconds to allow testing...")
+            Sleep(60000)
+            LogInfo("HOME", "Sleep complete")
+        end if
+    else if status = "error" then
+        LogWarn("HOME", "EPG load failed")
+        ' Don't show error - EPG is optional
+    end if
+end sub
+
 ' Navigation functions
 sub OpenAddPlaylist()
     LogInfo("HOME", "Opening Add Playlist")
@@ -652,18 +871,56 @@ sub OnAddPlaylistDialogButton()
         ' Add button pressed
         newUrl = m.addPlaylistDialog.text
         if newUrl <> invalid and newUrl <> "" then
-            LogInfo("HOME", "Adding new playlist: " + newUrl)
+            LogInfo("HOME", "Adding new playlist URL: " + newUrl)
             
-            ' Add to settings
-            m.settings.playlists.Push(newUrl)
-            SaveSettings(m.settings)
-            
-            ' Reload playlists immediately
-            if m.subtitle <> invalid then m.subtitle.text = "Loading new playlist..."
-            LoadPlaylistsInBackground()
+            ' Store the URL temporarily and ask for EPG URL
+            m.pendingPlaylistUrl = newUrl
+            ShowAddEpgDialog()
         end if
+    else
+        ' Cancel
+        m.top.dialog = invalid
     end if
+end sub
+
+sub ShowAddEpgDialog()
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog.title = "Add EPG URL (Optional)"
+    dialog.text = ""
+    dialog.message = "Enter XMLTV EPG URL (or leave blank):"
+    dialog.buttons = ["Continue", "Skip"]
+    m.top.dialog = dialog
     
+    dialog.ObserveField("buttonSelected", "OnAddEpgDialogButton")
+    m.addEpgDialog = dialog
+end sub
+
+sub OnAddEpgDialogButton()
+    epgUrl = ""
+    if m.addEpgDialog.buttonSelected = 0 then
+        ' Continue with EPG URL
+        epgUrl = m.addEpgDialog.text
+        if epgUrl = invalid then epgUrl = ""
+    end if
+    ' Skip button or empty = no EPG
+    
+    ' Create playlist object
+    newPlaylist = {
+        url: m.pendingPlaylistUrl,
+        epgUrl: epgUrl
+    }
+    
+    LogInfo("HOME", "Adding playlist with EPG: " + epgUrl)
+    
+    ' Add to settings
+    m.settings.playlists.Push(newPlaylist)
+    SaveSettings(m.settings)
+    
+    ' Reload playlists immediately
+    if m.subtitle <> invalid then m.subtitle.text = "Loading new playlist..."
+    LoadPlaylistsInBackground()
+    
+    m.pendingPlaylistUrl = invalid
     m.top.dialog = invalid
 end sub
 
@@ -743,14 +1000,85 @@ sub OpenRecents()
 end sub
 
 sub OpenGuide()
-    LogInfo("HOME", "Opening Guide view")
-    ShowError("Guide feature coming soon. EPG support will be added in a future update.", false)
-    ' TODO: Implement EPG guide view
+    LogInfo("HOME", "OpenGuide() called")
+    LogInfo("HOME", "m.categorizedPrograms is invalid: " + FormatJSON(m.categorizedPrograms = invalid))
+    
+    if m.categorizedPrograms <> invalid then
+        LogInfo("HOME", "m.categorizedPrograms.categories is invalid: " + FormatJSON(m.categorizedPrograms.categories = invalid))
+    end if
+    
+    if m.categorizedPrograms = invalid or m.categorizedPrograms.categories = invalid then
+        ShowError("No guide data available. Add a playlist with an EPG URL first.", false)
+        LogError("HOME", "Cannot open guide - no categorized programs")
+        return
+    end if
+    
+    LogInfo("HOME", "Category count: " + Str(m.categorizedPrograms.categories.Count()))
+    
+    if m.categorizedPrograms.categories.Count() = 0 then
+        ShowError("No programs found in guide. Check your EPG URL.", false)
+        LogError("HOME", "Cannot open guide - zero categories")
+        return
+    end if
+    
+    LogInfo("HOME", "All checks passed, calling ShowGuideView()")
+    ShowGuideView()
 end sub
 
 sub OpenSettings()
     LogInfo("HOME", "Opening Settings")
     ShowSettingsModal()
+end sub
+
+sub ShowGuideView()
+    LogInfo("HOME", "Showing guide view with " + Str(m.categorizedPrograms.categories.Count()) + " categories")
+    
+    ' Get or create guide view
+    appScene = m.top.GetScene()
+    guideView = appScene.FindNode("guideView")
+    
+    if guideView = invalid then
+        LogInfo("HOME", "Creating new GuideView")
+        guideView = CreateObject("roSGNode", "GuideView")
+        guideView.id = "guideView"
+        guideView.visible = false
+        appScene.appendChild(guideView)
+    end if
+    
+    ' Set data
+    guideView.categorizedPrograms = m.categorizedPrograms
+    guideView.ObserveField("closed", "OnGuideViewClosed")
+    
+    ' Hide home scene and show guide
+    m.top.visible = false
+    guideView.visible = true
+    guideView.setFocus(true)
+    
+    LogInfo("HOME", "Guide view shown and focused")
+end sub
+
+sub OnGuideViewClosed()
+    LogInfo("HOME", "Guide view closed")
+    
+    ' Get guide view
+    appScene = m.top.GetScene()
+    guideView = appScene.FindNode("guideView")
+    
+    if guideView <> invalid then
+        ' Hide guide view
+        guideView.visible = false
+    end if
+    
+    ' Show home scene and restore focus
+    m.top.visible = true
+    if m.currentFocusIndex <> invalid and m.currentFocusIndex >= 0 and m.currentFocusIndex < m.menuItems.Count() then
+        item = m.menuItems[m.currentFocusIndex]
+        if item <> invalid and item.button <> invalid then
+            item.button.setFocus(true)
+        end if
+    end if
+    
+    LogInfo("HOME", "Returned to home from guide")
 end sub
 
 sub ShowChannelList(channels as object, title as string)

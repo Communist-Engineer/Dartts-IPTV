@@ -47,7 +47,7 @@ function LoadSettings() as object
     ' Load from registry
     playlistsData = registry.Read("playlists")
     if playlistsData <> invalid and playlistsData <> "" then
-        settings.playlists = DeserializeArray(playlistsData)
+        settings.playlists = DeserializePlaylistArray(playlistsData)
     end if
     
     favoritesData = registry.Read("favorites")
@@ -86,7 +86,7 @@ sub SaveSettings(settings as object)
     registry = GetAppRegistry()
     
     if settings.playlists <> invalid then
-        registry.Write("playlists", SerializeArray(settings.playlists))
+        registry.Write("playlists", SerializePlaylistArray(settings.playlists))
     end if
     
     if settings.favorites <> invalid then
@@ -159,6 +159,50 @@ end function
 
 function StrReplace(source as string, find as string, replace as string) as string
     return source.Replace(find, replace)
+end function
+
+' Playlist serialization functions
+function SerializePlaylistArray(playlists as object) as string
+    if playlists = invalid or playlists.Count() = 0 then return ""
+    result = ""
+    for i = 0 to playlists.Count() - 1
+        if i > 0 then result = result + "||"
+        playlist = playlists[i]
+        
+        ' Handle both old string format and new object format
+        if Type(playlist) = "roString" or Type(playlist) = "String" then
+            ' Old format: just URL
+            result = result + StrReplace(playlist, "|", "^PIPE^") + "|"
+        else
+            ' New format: {url: "", epgUrl: ""}
+            url = ""
+            epgUrl = ""
+            if playlist.DoesExist("url") then url = playlist.url
+            if playlist.DoesExist("epgUrl") then epgUrl = playlist.epgUrl
+            result = result + StrReplace(url, "|", "^PIPE^") + "|" + StrReplace(epgUrl, "|", "^PIPE^")
+        end if
+    end for
+    return result
+end function
+
+function DeserializePlaylistArray(data as string) as object
+    if data = invalid or data = "" then return []
+    parts = data.Split("||")
+    result = []
+    for each part in parts
+        subparts = part.Split("|")
+        if subparts.Count() >= 1 then
+            playlist = {
+                url: StrReplace(subparts[0], "^PIPE^", "|"),
+                epgUrl: ""
+            }
+            if subparts.Count() >= 2 then
+                playlist.epgUrl = StrReplace(subparts[1], "^PIPE^", "|")
+            end if
+            result.Push(playlist)
+        end if
+    end for
+    return result
 end function
 
 ' ============================================
@@ -277,36 +321,79 @@ sub OnAddPlaylistDialogButton()
         ' Add button pressed
         newUrl = m.addPlaylistDialog.text
         if newUrl <> invalid and newUrl <> "" then
-            LogInfo("SETTINGS", "Adding new playlist: " + newUrl)
+            LogInfo("SETTINGS", "Adding new playlist URL: " + newUrl)
             
-            ' Load current settings
-            settings = LoadSettings()
-            
-            ' Check if already exists
-            alreadyExists = false
-            for each url in settings.playlists
-                if url = newUrl then
-                    alreadyExists = true
-                    exit for
-                end if
-            end for
-            
-            if not alreadyExists then
-                settings.playlists.Push(newUrl)
-                SaveSettings(settings)
-                LogInfo("SETTINGS", "Playlist added successfully")
-                
-                ' Signal reload required
-                m.top.reloadRequired = true
-                
-                ' Show success message
-                ShowInfoDialog("Playlist Added", "The playlist has been added and channels will reload when you close Settings.")
-            else
-                ShowInfoDialog("Already Exists", "This playlist URL is already configured.")
-            end if
+            ' Store the URL temporarily and ask for EPG URL
+            m.pendingPlaylistUrl = newUrl
+            ShowAddEpgDialog()
         end if
+    else
+        ' Cancel
+        m.top.GetScene().dialog = invalid
+    end if
+end sub
+
+sub ShowAddEpgDialog()
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog.title = "Add EPG URL (Optional)"
+    dialog.text = ""
+    dialog.message = "Enter XMLTV EPG URL (or leave blank):"
+    dialog.buttons = ["Continue", "Skip"]
+    m.top.GetScene().dialog = dialog
+    
+    dialog.ObserveField("buttonSelected", "OnAddEpgDialogButton")
+    m.addEpgDialog = dialog
+end sub
+
+sub OnAddEpgDialogButton()
+    epgUrl = ""
+    if m.addEpgDialog.buttonSelected = 0 then
+        ' Continue with EPG URL
+        epgUrl = m.addEpgDialog.text
+        if epgUrl = invalid then epgUrl = ""
+    end if
+    ' Skip button or empty = no EPG
+    
+    ' Load current settings
+    settings = LoadSettings()
+    
+    ' Create playlist object
+    newPlaylist = {
+        url: m.pendingPlaylistUrl,
+        epgUrl: epgUrl
+    }
+    
+    ' Check if URL already exists
+    alreadyExists = false
+    for each playlist in settings.playlists
+        playlistUrl = ""
+        if Type(playlist) = "roAssociativeArray" and playlist.DoesExist("url") then
+            playlistUrl = playlist.url
+        else
+            playlistUrl = playlist
+        end if
+        
+        if playlistUrl = m.pendingPlaylistUrl then
+            alreadyExists = true
+            exit for
+        end if
+    end for
+    
+    if not alreadyExists then
+        settings.playlists.Push(newPlaylist)
+        SaveSettings(settings)
+        LogInfo("SETTINGS", "Playlist added with EPG: " + epgUrl)
+        
+        ' Signal reload required
+        m.top.reloadRequired = true
+        
+        ' Show success message
+        ShowInfoDialog("Playlist Added", "The playlist has been added and channels will reload when you close Settings.")
+    else
+        ShowInfoDialog("Already Exists", "This playlist URL is already configured.")
     end if
     
+    m.pendingPlaylistUrl = invalid
     m.top.GetScene().dialog = invalid
 end sub
 
@@ -336,22 +423,41 @@ sub ShowPlaylistActionDialog()
         return
     end if
     
-    currentUrl = m.managedPlaylists[m.managePlaylistIndex]
+    currentPlaylist = m.managedPlaylists[m.managePlaylistIndex]
+    
+    ' Extract URL and EPG URL
+    currentUrl = ""
+    currentEpgUrl = ""
+    if Type(currentPlaylist) = "roAssociativeArray" then
+        if currentPlaylist.DoesExist("url") then currentUrl = currentPlaylist.url
+        if currentPlaylist.DoesExist("epgUrl") then currentEpgUrl = currentPlaylist.epgUrl
+    else
+        currentUrl = currentPlaylist
+    end if
     
     ' Truncate URL for display
     displayUrl = currentUrl
-    if Len(displayUrl) > 80 then
-        displayUrl = Left(displayUrl, 77) + "..."
+    if Len(displayUrl) > 70 then
+        displayUrl = Left(displayUrl, 67) + "..."
     end if
     
     message = "Playlist " + Str(m.managePlaylistIndex + 1) + " of " + Str(m.managedPlaylists.Count()) + Chr(10) + Chr(10)
-    message = message + displayUrl + Chr(10) + Chr(10)
-    message = message + "What would you like to do?"
+    message = message + "URL: " + displayUrl + Chr(10)
+    if currentEpgUrl <> "" then
+        displayEpg = currentEpgUrl
+        if Len(displayEpg) > 70 then
+            displayEpg = Left(displayEpg, 67) + "..."
+        end if
+        message = message + "EPG: " + displayEpg + Chr(10)
+    else
+        message = message + "EPG: (none)" + Chr(10)
+    end if
+    message = message + Chr(10) + "What would you like to do?"
     
     dialog = CreateObject("roSGNode", "Dialog")
     dialog.title = "Manage Playlist"
     dialog.message = message
-    dialog.buttons = ["Edit", "Delete", "Next", "Done"]
+    dialog.buttons = ["Edit URL", "Edit EPG", "Delete", "Next", "Done"]
     m.top.GetScene().dialog = dialog
     
     dialog.ObserveField("buttonSelected", "OnPlaylistActionButton")
@@ -363,27 +469,36 @@ sub OnPlaylistActionButton()
     m.top.GetScene().dialog = invalid
     
     if buttonIndex = 0 then
-        ' Edit
-        ShowEditPlaylistDialog()
+        ' Edit URL
+        ShowEditPlaylistUrlDialog()
     else if buttonIndex = 1 then
+        ' Edit EPG
+        ShowEditPlaylistEpgDialog()
+    else if buttonIndex = 2 then
         ' Delete
         ConfirmDeletePlaylist()
-    else if buttonIndex = 2 then
+    else if buttonIndex = 3 then
         ' Next
         m.managePlaylistIndex = m.managePlaylistIndex + 1
         if m.managePlaylistIndex >= m.managedPlaylists.Count() then
             m.managePlaylistIndex = 0
         end if
         ShowPlaylistActionDialog()
-    else if buttonIndex = 3 then
+    else if buttonIndex = 4 then
         ' Done
         m.managedPlaylists = invalid
         m.managePlaylistIndex = 0
     end if
 end sub
 
-sub ShowEditPlaylistDialog()
-    currentUrl = m.managedPlaylists[m.managePlaylistIndex]
+sub ShowEditPlaylistUrlDialog()
+    currentPlaylist = m.managedPlaylists[m.managePlaylistIndex]
+    currentUrl = ""
+    if Type(currentPlaylist) = "roAssociativeArray" and currentPlaylist.DoesExist("url") then
+        currentUrl = currentPlaylist.url
+    else
+        currentUrl = currentPlaylist
+    end if
     
     dialog = CreateObject("roSGNode", "KeyboardDialog")
     dialog.title = "Edit Playlist URL"
@@ -392,21 +507,30 @@ sub ShowEditPlaylistDialog()
     dialog.buttons = ["Save", "Cancel"]
     m.top.GetScene().dialog = dialog
     
-    dialog.ObserveField("buttonSelected", "OnEditPlaylistDialogButton")
-    m.editPlaylistDialog = dialog
+    dialog.ObserveField("buttonSelected", "OnEditPlaylistUrlDialogButton")
+    m.editPlaylistUrlDialog = dialog
 end sub
 
-sub OnEditPlaylistDialogButton()
-    if m.editPlaylistDialog.buttonSelected = 0 then
+sub OnEditPlaylistUrlDialogButton()
+    if m.editPlaylistUrlDialog.buttonSelected = 0 then
         ' Save button pressed
-        newUrl = m.editPlaylistDialog.text
-        if newUrl <> invalid and newUrl <> "" and newUrl <> m.managedPlaylists[m.managePlaylistIndex] then
+        newUrl = m.editPlaylistUrlDialog.text
+        if newUrl <> invalid and newUrl <> "" then
             LogInfo("SETTINGS", "Editing playlist URL")
             
-            ' Update in memory
-            m.managedPlaylists[m.managePlaylistIndex] = newUrl
+            ' Update playlist object
+            currentPlaylist = m.managedPlaylists[m.managePlaylistIndex]
+            if Type(currentPlaylist) = "roAssociativeArray" then
+                currentPlaylist.url = newUrl
+            else
+                ' Convert old string to object
+                m.managedPlaylists[m.managePlaylistIndex] = {
+                    url: newUrl,
+                    epgUrl: ""
+                }
+            end if
             
-            ' Load and update settings
+            ' Save settings
             settings = LoadSettings()
             settings.playlists = m.managedPlaylists
             SaveSettings(settings)
@@ -414,7 +538,7 @@ sub OnEditPlaylistDialogButton()
             ' Signal reload required
             m.top.reloadRequired = true
             
-            LogInfo("SETTINGS", "Playlist updated successfully")
+            LogInfo("SETTINGS", "Playlist URL updated successfully")
             ShowInfoDialog("Playlist Updated", "The playlist URL has been updated. Channels will reload when you close Settings.")
         end if
     else
@@ -425,8 +549,72 @@ sub OnEditPlaylistDialogButton()
     m.top.GetScene().dialog = invalid
 end sub
 
+sub ShowEditPlaylistEpgDialog()
+    currentPlaylist = m.managedPlaylists[m.managePlaylistIndex]
+    currentEpgUrl = ""
+    if Type(currentPlaylist) = "roAssociativeArray" and currentPlaylist.DoesExist("epgUrl") then
+        currentEpgUrl = currentPlaylist.epgUrl
+    end if
+    
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog.title = "Edit EPG URL"
+    dialog.text = currentEpgUrl
+    dialog.message = "Edit the XMLTV EPG URL (or leave blank):"
+    dialog.buttons = ["Save", "Cancel"]
+    m.top.GetScene().dialog = dialog
+    
+    dialog.ObserveField("buttonSelected", "OnEditPlaylistEpgDialogButton")
+    m.editPlaylistEpgDialog = dialog
+end sub
+
+sub OnEditPlaylistEpgDialogButton()
+    if m.editPlaylistEpgDialog.buttonSelected = 0 then
+        ' Save button pressed
+        newEpgUrl = m.editPlaylistEpgDialog.text
+        if newEpgUrl = invalid then newEpgUrl = ""
+        
+        LogInfo("SETTINGS", "Editing playlist EPG URL")
+        
+        ' Update playlist object
+        currentPlaylist = m.managedPlaylists[m.managePlaylistIndex]
+        if Type(currentPlaylist) = "roAssociativeArray" then
+            currentPlaylist.epgUrl = newEpgUrl
+        else
+            ' Convert old string to object
+            m.managedPlaylists[m.managePlaylistIndex] = {
+                url: currentPlaylist,
+                epgUrl: newEpgUrl
+            }
+        end if
+        
+        ' Save settings
+        settings = LoadSettings()
+        settings.playlists = m.managedPlaylists
+        SaveSettings(settings)
+        
+        ' Signal reload required
+        m.top.reloadRequired = true
+        
+        LogInfo("SETTINGS", "Playlist EPG URL updated successfully")
+        ShowInfoDialog("EPG Updated", "The EPG URL has been updated. Channels will reload when you close Settings.")
+    else
+        ' Cancel - go back to playlist action
+        ShowPlaylistActionDialog()
+    end if
+    
+    m.top.GetScene().dialog = invalid
+end sub
+
 sub ConfirmDeletePlaylist()
-    currentUrl = m.managedPlaylists[m.managePlaylistIndex]
+    currentPlaylist = m.managedPlaylists[m.managePlaylistIndex]
+    
+    ' Extract URL for display
+    currentUrl = ""
+    if Type(currentPlaylist) = "roAssociativeArray" and currentPlaylist.DoesExist("url") then
+        currentUrl = currentPlaylist.url
+    else
+        currentUrl = currentPlaylist
+    end if
     
     ' Truncate URL for display
     displayUrl = currentUrl

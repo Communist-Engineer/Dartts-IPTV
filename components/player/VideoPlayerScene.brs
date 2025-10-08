@@ -20,17 +20,38 @@ end sub
 sub init()
     LogInfo("VideoPlayer", "Initializing Video Player Scene")
     
+    ' Get device display resolution
+    deviceInfo = CreateObject("roDeviceInfo")
+    displaySize = deviceInfo.GetDisplaySize()
+    screenWidth = displaySize.w
+    screenHeight = displaySize.h
+    
+    LogInfo("VideoPlayer", "Device resolution: " + Str(screenWidth) + "x" + Str(screenHeight))
+    
     m.videoNode = m.top.FindNode("videoNode")
     m.playerOverlay = m.top.FindNode("playerOverlay")
     m.loadingBg = m.top.FindNode("loadingBg")
     m.loadingLabel = m.top.FindNode("loadingLabel")
     m.errorLabel = m.top.FindNode("errorLabel")
     
+    ' Update loading background and labels to match screen resolution
+    if m.loadingBg <> invalid then
+        m.loadingBg.width = screenWidth
+        m.loadingBg.height = screenHeight
+    end if
+    
+    if m.loadingLabel <> invalid then
+        m.loadingLabel.translation = [screenWidth / 2 - 100, screenHeight / 2]
+    end if
+    
+    if m.errorLabel <> invalid then
+        m.errorLabel.translation = [screenWidth / 2 - 200, screenHeight / 2]
+    end if
+    
     if m.videoNode <> invalid then
-        ' Configure video scaling to fit screen properly
-        ' Using 720p as it's a common resolution and should scale better
-        m.videoNode.width = 1280
-        m.videoNode.height = 720
+        ' Configure video to fill entire screen using device resolution
+        m.videoNode.width = screenWidth
+        m.videoNode.height = screenHeight
         m.videoNode.translation = [0, 0]
         
         ' Set video to fill the available space while maintaining aspect ratio
@@ -44,7 +65,7 @@ sub init()
         m.videoNode.ObserveField("position", "VideoPlayerOnPositionChanged")
         m.videoNode.setFocus(true)
         
-        LogInfo("VideoPlayer", "Video node configured: 1280x720")
+        LogInfo("VideoPlayer", "Video node configured: " + Str(screenWidth) + "x" + Str(screenHeight))
     else
         LogError("VideoPlayer", "Failed to find videoNode")
     end if

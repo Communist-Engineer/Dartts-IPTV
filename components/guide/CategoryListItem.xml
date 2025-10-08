@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="CategoryListItem" extends="Group">
+    <interface>
+        <field id="itemContent" type="assocarray" onChange="OnContentChanged" />
+    </interface>
+    <children>
+        <!-- Background -->
+        <Rectangle id="background"
+                   width="400"
+                   height="160"
+                   color="0x303030FF" />
+        
+        <!-- Category name -->
+        <Label id="categoryLabel"
+               translation="[20,60]"
+               width="360"
+               height="50"
+               font="font:MediumBoldSystemFont"
+               color="0xEEEEEEFF"
+               horizAlign="center"
+               vertAlign="center"
+               wrap="true"
+               text="" />
+        
+        <!-- Program count -->
+        <Label id="countLabel"
+               translation="[20,110]"
+               width="360"
+               height="30"
+               font="font:SmallSystemFont"
+               color="0xAAAAAAFF"
+               horizAlign="center"
+               text="" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/components/guide/CategoryListItem.brs" />
+</component>

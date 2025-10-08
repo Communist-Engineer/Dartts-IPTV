@@ -1,11 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component name="GuideView" extends="Group">
     <interface>
-        <field id="epgData" type="assocarray" alwaysNotify="true" />
+        <field id="categorizedPrograms" type="assocarray" alwaysNotify="true" />
+        <field id="closed" type="boolean" alwaysNotify="true" />
     </interface>
     <children>
-        <Label id="header" translation="[60,60]" font="font:LargeBoldSystemFont" text="Guide" />
-        <Label id="status" translation="[60,140]" font="font:MediumSystemFont" text="EPG loading..." />
+        <!-- Background -->
+        <Rectangle id="background" width="1920" height="1080" color="0x000000FF" />
+        
+        <!-- Header -->
+        <Label id="header" translation="[60,60]" font="font:LargeBoldSystemFont" color="0xEEEEEEFF" text="Guide" />
+        <Label id="subtitle" translation="[60,120]" font="font:MediumSystemFont" color="0xAAAAAAFF" text="Select a category" />
+        
+        <!-- Category List -->
+        <RowList id="categoryList"
+                 translation="[60,180]"
+                 itemComponentName="CategoryListItem"
+                 numRows="1"
+                 rowHeights="[180]"
+                 rowItemSize="[[400,160]]"
+                 itemSpacing="[20,0]"
+                 showRowLabel="[false]"
+                 visible="true" />
+        
+        <!-- Program List (shown when category selected) -->
+        <Rectangle id="programBackground"
+                   translation="[60,400]"
+                   width="1800"
+                   height="600"
+                   color="0x202020FF"
+                   visible="false" />
+        
+        <Label id="programHeader"
+               translation="[80,420]"
+               font="font:MediumBoldSystemFont"
+               color="0xEEEEEEFF"
+               text="Live Now"
+               visible="false" />
+        
+        <List id="programList"
+              translation="[80,470]"
+              width="1760"
+              height="500"
+              itemComponentName="ProgramListItem"
+              itemSize="[1760,100]"
+              itemSpacing="10"
+              visible="false" />
+        
+        <!-- Help text -->
+        <Label id="helpLabel"
+               translation="[60,1020]"
+               font="font:SmallSystemFont"
+               color="0x888888FF"
+               text="◀ ▶ Navigate categories  •  OK to view programs  •  ◀ Back to exit" />
     </children>
-    <script type="text/brightscript" uri="pkg:/components/guide/GuideView.brs" entry="GuideViewInit" />
+    <script type="text/brightscript" uri="pkg:/components/guide/GuideView.brs" />
 </component>

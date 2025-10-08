@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="ProgramListItem" extends="Group">
+    <interface>
+        <field id="itemContent" type="assocarray" onChange="OnContentChanged" />
+    </interface>
+    <children>
+        <!-- Background -->
+        <Rectangle id="background"
+                   width="1760"
+                   height="100"
+                   color="0x282828FF" />
+        
+        <!-- Channel name -->
+        <Label id="channelLabel"
+               translation="[20,15]"
+               width="300"
+               height="30"
+               font="font:SmallBoldSystemFont"
+               color="0xFFFFFFFF"
+               text="" />
+        
+        <!-- Program title -->
+        <Label id="titleLabel"
+               translation="[20,45]"
+               width="1200"
+               height="40"
+               font="font:MediumSystemFont"
+               color="0xEEEEEEFF"
+               text="" />
+        
+        <!-- Time -->
+        <Label id="timeLabel"
+               translation="[1520,45]"
+               width="220"
+               height="40"
+               font="font:SmallSystemFont"
+               color="0xAAAAAAFF"
+               horizAlign="right"
+               text="" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/components/guide/ProgramListItem.brs" />
+</component>
