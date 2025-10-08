@@ -15,6 +15,12 @@ sub Main()
     InitializeAppConfig()
 
     scene = screen.CreateScene("MainScene")
+    ' Note: CreateScene automatically sets the scene, but we keep the reference for potential future use
+    if scene = invalid then
+        print "ERROR: Failed to create MainScene"
+        return
+    end if
+    
     screen.Show()
 
     while true

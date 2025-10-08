@@ -2,8 +2,58 @@
 <component name="MainScene" extends="Scene">
   <script type="text/brightscript" uri="MainScene.brs" />
   
+  <interface>
+    <field id="currentView" type="string" value="home" />
+  </interface>
+  
   <children>
-    <Label id="testLabel" text="Dartt's IPTV" />
-    <Label id="statusLabel" text="Loading..." translation="[0,100]" />
+    <!-- Background -->
+    <Rectangle 
+      id="background"
+      width="1280"
+      height="720"
+      color="0x000000FF" />
+    
+    <!-- Main content container -->
+    <Group id="contentGroup">
+      <!-- Title bar -->
+      <Rectangle 
+        id="titleBar"
+        width="1280"
+        height="80"
+        color="0x1A1A1AFF" />
+      
+      <Label 
+        id="titleLabel" 
+        text="Dartt's IPTV" 
+        translation="[40,25]"
+        font="font:LargeBoldSystemFont"
+        color="0xFFFFFFFF" />
+      
+      <!-- Content area -->
+      <Label 
+        id="welcomeLabel"
+        text="Welcome to Dartt's IPTV"
+        translation="[640,300]"
+        horizAlign="center"
+        font="font:LargeBoldSystemFont"
+        color="0xFFFFFFFF" />
+      
+      <Label 
+        id="instructionLabel"
+        text="Press OK to continue"
+        translation="[640,400]"
+        horizAlign="center"
+        font="font:MediumSystemFont"
+        color="0xCCCCCCFF" />
+      
+      <Label 
+        id="statusLabel"
+        text="Ready"
+        translation="[640,500]"
+        horizAlign="center"
+        font="font:SmallSystemFont"
+        color="0x888888FF" />
+    </Group>
   </children>
 </component>
