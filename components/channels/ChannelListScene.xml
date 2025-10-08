@@ -24,8 +24,13 @@
             itemSize="[1800,90]"
             itemSpacing="[0,5]"
             numRows="8"
+            rowHeights="[90]"
+            rowItemSize="[[1800,90]]"
+            rowItemSpacing="[[0,5]]"
             visible="true"
-            focusable="true" />
+            focusable="true"
+            vertFocusAnimationStyle="floatingFocus"
+            showRowLabel="false" />
         
         <!-- No Channels Message -->
         <Label id="emptyMessage" 

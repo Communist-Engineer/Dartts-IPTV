@@ -100,7 +100,10 @@ sub PopulateChannelList()
     ' Set the content on the list
     m.channelList.content = content
     
-    LogInfo("CHANNELLIST", "Channel list populated with " + Str(content.getChildCount()) + " items")
+    ' Set focus on the channel list after populating
+    m.channelList.setFocus(true)
+    
+    LogInfo("CHANNELLIST", "Channel list populated with " + Str(content.getChildCount()) + " items and focused")
 end sub
 
 sub OnChannelSelected()

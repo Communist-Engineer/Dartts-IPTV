@@ -280,6 +280,9 @@ end sub
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
     
+    ' Don't handle keys if we're not visible
+    if not m.top.visible then return false
+    
     handled = false
     
     if key = "left" then
@@ -751,26 +754,30 @@ sub OpenSettings()
 end sub
 
 sub ShowChannelList(channels as object, title as string)
+    LogInfo("HOME", "Showing channel list: " + title + " with " + Str(channels.Count()) + " channels")
+    
     ' Get or create channel list scene
     appScene = m.top.GetScene()
     channelList = appScene.FindNode("channelListScene")
     
     if channelList = invalid then
+        LogInfo("HOME", "Creating new ChannelListScene")
         channelList = CreateObject("roSGNode", "ChannelListScene")
         channelList.id = "channelListScene"
         channelList.visible = false
         appScene.appendChild(channelList)
     end if
     
-    ' Set data and show
+    ' Set data
     channelList.channels = channels
     channelList.title = title
-    channelList.visible = true
     
-    ' Hide home scene
+    ' Hide home scene and show channel list
     m.top.visible = false
+    channelList.visible = true
+    channelList.setFocus(true)
     
-    LogInfo("HOME", "Showing channel list: " + title)
+    LogInfo("HOME", "Channel list scene shown and focused")
 end sub
 
 sub ShowSettingsModal()
