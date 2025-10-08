@@ -3,10 +3,37 @@
     <interface>
         <field id="channels" type="array" alwaysNotify="true" />
         <field id="title" type="string" alwaysNotify="true" />
+        <field id="selectedChannel" type="assocarray" />
     </interface>
     <children>
-        <Label id="titleLabel" translation="[60,60]" font="font:LargeBoldSystemFont" text="Channels" />
-        <Label id="placeholderLabel" translation="[60,140]" font="font:MediumSystemFont" text="Channel list will appear here." />
+        <!-- Background -->
+        <Rectangle id="background" width="1920" height="1080" color="0x000000FF" />
+        
+        <!-- Title Bar -->
+        <Rectangle id="titleBar" translation="[0,0]" width="1920" height="100" color="0x1A1A1AFF">
+            <Label id="titleLabel" translation="[60,35]" font="font:LargeBoldSystemFont" text="Channels" color="0xFFFFFFFF" />
+        </Rectangle>
+        
+        <!-- Help Text -->
+        <Label id="helpLabel" translation="[60,110]" font="font:SmallSystemFont" text="Use ↑↓ to navigate, OK to play, Back to return" color="0xAAAAAAFF" />
+        
+        <!-- Channel List -->
+        <RowList 
+            id="channelList"
+            translation="[60,160]"
+            itemSize="[1800,90]"
+            itemSpacing="[0,5]"
+            numRows="8"
+            visible="true"
+            focusable="true" />
+        
+        <!-- No Channels Message -->
+        <Label id="emptyMessage" 
+            translation="[60,300]" 
+            font="font:MediumSystemFont" 
+            text="No channels to display" 
+            color="0x888888FF"
+            visible="false" />
     </children>
     <script type="text/brightscript" uri="pkg:/components/channels/ChannelListScene.brs" />
 </component>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="ChannelListItem" extends="Group">
+    <interface>
+        <field id="itemContent" type="node" onChange="OnContentChanged" />
+        <field id="focusPercent" type="float" onChange="OnFocusPercentChanged" />
+    </interface>
+    <children>
+        <!-- Background -->
+        <Rectangle id="background" width="1800" height="90" color="0x1A1A1AFF" />
+        
+        <!-- Focus indicator -->
+        <Rectangle id="focusIndicator" width="1800" height="90" color="0x3366FFFF" opacity="0.0" />
+        
+        <!-- Channel logo (optional) -->
+        <Poster 
+            id="channelLogo"
+            translation="[20,15]"
+            width="60"
+            height="60"
+            loadDisplayMode="scaleToFit"
+            failedBitmapUri=""
+            visible="false" />
+        
+        <!-- Channel number badge -->
+        <Rectangle id="numberBadge" translation="[20,20]" width="60" height="50" color="0x333333FF">
+            <Label id="channelNumber" translation="[0,10]" width="60" height="40" horizAlign="center" vertAlign="center" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
+        </Rectangle>
+        
+        <!-- Channel title -->
+        <Label 
+            id="channelTitle"
+            translation="[100,25]"
+            width="1500"
+            height="40"
+            font="font:MediumBoldSystemFont"
+            color="0xFFFFFFFF"
+            text=""
+            ellipsizeTextOnBoundary="true" />
+        
+        <!-- Channel group/category -->
+        <Label 
+            id="channelGroup"
+            translation="[100,55]"
+            width="1500"
+            height="30"
+            font="font:SmallSystemFont"
+            color="0x999999FF"
+            text=""
+            ellipsizeTextOnBoundary="true" />
+    </children>
+    <script type="text/brightscript" uri="pkg:/components/channels/ChannelListItem.brs" />
+</component>
