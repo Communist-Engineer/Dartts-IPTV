@@ -4,15 +4,18 @@ sub Main()
     screen.SetMessagePort(port)
 
     m.global = screen.GetGlobalNode()
-    m.global.AddField("appConfig", "assocarray")
-    m.global.AddField("cache", "assocarray")
-    m.global.AddField("deepLinkArgs", "assocarray")
+    ' Add fields to global node using addFields (plural) with field definitions
+    m.global.addFields({
+        appConfig: {},
+        cache: {},
+        deepLinkArgs: {}
+    })
 
     ' placeholder for initializing persistent storage/config
     InitializeAppConfig()
 
     scene = screen.CreateScene("AppScene")
-    scene.AddField("launchArgs", "assocarray")
+    ' Set launch args on the scene (field is defined in AppScene.xml)
     scene.launchArgs = GetDeepLinkArgs()
 
     screen.SetRoot(scene)

@@ -36,7 +36,7 @@ sub ShowFirstRunNotice()
     end if
 end sub
 
-sub OnFirstRunDialogButton(event as object)
+sub OnFirstRunDialogButton()
     registry = CreateObject("roRegistrySection", "dartts_iptv_settings")
     registry.Write("first_run_complete", "true")
     registry.Flush()
