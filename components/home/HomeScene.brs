@@ -79,6 +79,20 @@ function LoadSettings() as object
     userAgent = registry.Read("user_agent")
     if userAgent <> invalid and userAgent <> "" then settings.userAgent = userAgent
     
+    ' Add default playlist for development if no playlists exist
+    if settings.playlists.Count() = 0 then
+        LogInfo("HOME", "No playlists found, adding default development playlist")
+        defaultPlaylist = {
+            url: "https://tvpass.org/playlist/m3u",
+            epgUrl: "https://tvpass.org/epg.xml"
+        }
+        settings.playlists.Push(defaultPlaylist)
+        ' Save the default playlist immediately
+        registry.Write("playlists", SerializePlaylistArray(settings.playlists))
+        registry.Flush()
+        LogInfo("HOME", "Default playlist added and saved")
+    end if
+    
     return settings
 end function
 
@@ -837,10 +851,7 @@ sub OnEpgLoadComplete()
             LogInfo("HOME", "Categorized into " + Str(categoryCount) + " categories")
             if m.subtitle <> invalid then m.subtitle.text = "Ready - " + Str(m.channels.Count()) + " channels, " + Str(categoryCount) + " guide categories"
             
-            ' Sleep for 60 seconds to allow testing
-            LogInfo("HOME", "Sleeping for 60 seconds to allow testing...")
-            Sleep(60000)
-            LogInfo("HOME", "Sleep complete")
+            LogInfo("HOME", "EPG loading and categorization complete")
         end if
     else if status = "error" then
         LogWarn("HOME", "EPG load failed")

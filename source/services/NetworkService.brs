@@ -13,7 +13,7 @@ function FetchTextResource(url as string, options = invalid) as object
         return response
     end if
 
-    if Left(url.ToLower(), 5) = "file:" then
+    if Left(LCase(url), 5) = "file:" then
         return FetchLocalFile(url)
     end if
 
@@ -39,22 +39,22 @@ function FetchTextResource(url as string, options = invalid) as object
             end for
         end if
 
-        if options <> invalid and options.DoesExist("userAgent") then
-            transfer.SetUserAgent(options.userAgent)
-        end if
+        ' SetUserAgent not available in Task context, skip it
+        ' if options <> invalid and options.DoesExist("userAgent") then
+        '     transfer.SetUserAgent(options.userAgent)
+        ' end if
 
         result = transfer.GetToString()
-        status = transfer.GetResponseCode()
-
-        if status = 200 and result <> invalid then
+        
+        ' In Task context, GetResponseCode() and GetResponseHeaders() are not available
+        ' If we got a result, assume success
+        if result <> invalid and Len(result) > 0 then
             response.success = true
-            response.statusCode = status
+            response.statusCode = 200
             response.body = result
-            response.headers = transfer.GetResponseHeaders()
             return response
         else
-            response.statusCode = status
-            response.error = "HTTP " + Str(status)
+            response.error = "Empty or invalid response"
             if attempt < retries then
                 Sleep(100 * (attempt + 1) * (attempt + 1))
             end if

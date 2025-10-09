@@ -25,8 +25,9 @@ function ParseXMLTV(xmlContent as string, options = invalid) as object
     channelNodes = xml.GetNamedElements("channel")
     if channelNodes <> invalid then
         for each channelNode in channelNodes
-            channelId = channelNode.GetAttributes().Lookup("id", "")
-            if channelId = "" then
+            ' In Task context, use @attribute syntax instead of GetAttributes()
+            channelId = channelNode@id
+            if channelId = invalid or channelId = "" then
                 result.errors.Push("Channel element missing id")
             else
                 channelInfo = ParseXmltvChannel(channelNode)
@@ -38,8 +39,9 @@ function ParseXMLTV(xmlContent as string, options = invalid) as object
     programmeNodes = xml.GetNamedElements("programme")
     if programmeNodes <> invalid then
         for each programmeNode in programmeNodes
-            channelId = programmeNode.GetAttributes().Lookup("channel", "")
-            if channelId = "" then
+            ' In Task context, use @attribute syntax instead of GetAttributes()
+            channelId = programmeNode@channel
+            if channelId = invalid or channelId = "" then
                 result.errors.Push("Programme missing channel attribute")
             else
                 programInfo = ParseXmltvProgramme(programmeNode, timeOffset)
@@ -59,27 +61,37 @@ end function
 
 function ParseXmltvChannel(channelNode as object) as object
     channel = CreateObject("roAssociativeArray")
-    channel.id = channelNode.GetAttributes().Lookup("id", "")
+    ' In Task context, use @attribute syntax
+    channel.id = channelNode@id
+    if channel.id = invalid then channel.id = ""
     channel.displayName = ""
     channel.icon = ""
 
     displayNodes = channelNode.GetNamedElements("display-name")
     if displayNodes <> invalid and displayNodes.Count() > 0 then
-        channel.displayName = displayNodes[0].GetText().Trim()
+        textContent = displayNodes[0].GetText()
+        if textContent <> invalid then
+            channel.displayName = textContent.Trim()
+        end if
     end if
 
     iconNodes = channelNode.GetNamedElements("icon")
     if iconNodes <> invalid and iconNodes.Count() > 0 then
-        channel.icon = iconNodes[0].GetAttributes().Lookup("src", "")
+        srcAttr = iconNodes[0]@src
+        if srcAttr <> invalid then
+            channel.icon = srcAttr
+        end if
     end if
 
     return channel
 end function
 
 function ParseXmltvProgramme(programNode as object, timeOffset as integer) as dynamic
-    attrs = programNode.GetAttributes()
-    startText = attrs.Lookup("start", "")
-    stopText = attrs.Lookup("stop", "")
+    ' In Task context, use @attribute syntax
+    startText = programNode@start
+    stopText = programNode@stop
+    if startText = invalid then startText = ""
+    if stopText = invalid then stopText = ""
 
     startTime = ParseXmltvTime(startText, timeOffset)
     endTime = ParseXmltvTime(stopText, timeOffset)
@@ -99,7 +111,10 @@ function ParseXmltvProgramme(programNode as object, timeOffset as integer) as dy
     if categoryNodes <> invalid and categoryNodes.Count() > 0 then
         categories = []
         for each catNode in categoryNodes
-            categories.Push(catNode.GetText().Trim())
+            textContent = catNode.GetText()
+            if textContent <> invalid then
+                categories.Push(textContent.Trim())
+            end if
         end for
         program.categories = categories
     end if
@@ -110,8 +125,14 @@ function ParseXmltvProgramme(programNode as object, timeOffset as integer) as dy
     episodeNodes = programNode.GetNamedElements("episode-num")
     if episodeNodes <> invalid and episodeNodes.Count() > 0 then
         for each epNode in episodeNodes
-            systemAttr = epNode.GetAttributes().Lookup("system", "")
-            value = epNode.GetText().Trim()
+            ' In Task context, use @attribute syntax
+            systemAttr = epNode@system
+            if systemAttr = invalid then systemAttr = ""
+            textContent = epNode.GetText()
+            value = ""
+            if textContent <> invalid then
+                value = textContent.Trim()
+            end if
             if systemAttr = "xmltv_ns" then
                 parts = value.Split(".")
                 if parts.Count() >= 2 then
@@ -130,7 +151,10 @@ end function
 function ExtractFirstText(parentNode as object, elementName as string) as string
     nodes = parentNode.GetNamedElements(elementName)
     if nodes <> invalid and nodes.Count() > 0 then
-        return nodes[0].GetText().Trim()
+        textContent = nodes[0].GetText()
+        if textContent <> invalid then
+            return textContent.Trim()
+        end if
     end if
     return ""
 end function
@@ -218,23 +242,48 @@ function ParseXmltvTime(timestamp as string, timeOffsetMinutes as integer) as dy
     if timestamp = invalid or Len(timestamp) < 14 then return invalid
     cleaned = timestamp.Replace(" ", "")
 
-    iso = Left(cleaned, 4) + "-" + Mid(cleaned, 5, 2) + "-" + Mid(cleaned, 7, 2) + "T" + Mid(cleaned, 9, 2) + ":" + Mid(cleaned, 11, 2) + ":" + Mid(cleaned, 13, 2)
+    ' Parse timestamp directly: YYYYMMDDHHMMSS +HHMM
+    year = Val(Mid(cleaned, 1, 4))
+    month = Val(Mid(cleaned, 5, 2))
+    day = Val(Mid(cleaned, 7, 2))
+    hour = Val(Mid(cleaned, 9, 2))
+    minute = Val(Mid(cleaned, 11, 2))
+    second = Val(Mid(cleaned, 13, 2))
 
+    ' Convert to Unix timestamp (rough approximation for task context)
+    ' Days since epoch (Jan 1, 1970)
+    daysFromYears = (year - 1970) * 365
+    leapYears = Int((year - 1969) / 4) - Int((year - 1901) / 100) + Int((year - 1601) / 400)
+    daysFromYears = daysFromYears + leapYears
+    
+    ' Days in each month (non-leap year)
+    monthDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+    daysFromMonths = monthDays[month - 1]
+    if month > 2 and (year Mod 4 = 0 and (year Mod 100 <> 0 or year Mod 400 = 0)) then
+        daysFromMonths = daysFromMonths + 1 ' Leap year adjustment
+    end if
+    
+    totalDays = daysFromYears + daysFromMonths + day - 1
+    totalSeconds = (totalDays * 86400) + (hour * 3600) + (minute * 60) + second
+
+    ' Handle timezone offset if present
     if Len(cleaned) >= 19 then
         sign = Mid(cleaned, 15, 1)
-        offset = Mid(cleaned, 16, 2) + ":" + Mid(cleaned, 18, 2)
-        iso = iso + sign + offset
-    else
-        iso = iso + "Z"
+        tzHour = Val(Mid(cleaned, 16, 2))
+        tzMinute = Val(Mid(cleaned, 18, 2))
+        tzOffsetSeconds = (tzHour * 3600) + (tzMinute * 60)
+        if sign = "-" then tzOffsetSeconds = -tzOffsetSeconds
+        ' Subtract timezone offset to get UTC
+        totalSeconds = totalSeconds - tzOffsetSeconds
     end if
-
-    dt = CreateObject("roDateTime")
-    if not dt.FromISO8601String(iso) then return invalid
 
     if timeOffsetMinutes <> 0 then
-        dt.AddSeconds(timeOffsetMinutes * 60)
+        totalSeconds = totalSeconds + (timeOffsetMinutes * 60)
     end if
 
+    ' Create roDateTime from seconds
+    dt = CreateObject("roDateTime")
+    dt.FromSeconds(totalSeconds)
     dt.ToLocalTime()
     return dt
 end function

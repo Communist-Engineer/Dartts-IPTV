@@ -7,5 +7,12 @@
     </interface>
     <script type="text/brightscript" uri="pkg:/source/services/NetworkService.brs" />
     <script type="text/brightscript" uri="pkg:/source/services/XMLTVParser.brs" />
-    <script type="text/brightscript" uri="pkg:/source/tasks/EpgLoaderTask.brs" entry="EpgLoaderTaskRun" />
+    <script type="text/brightscript" uri="pkg:/source/tasks/EpgLoaderTask.brs" />
+    <script type="text/brightscript">
+        <![CDATA[
+        sub init()
+            m.top.functionName = "EpgLoaderTaskRun"
+        end sub
+        ]]>
+    </script>
 </component>

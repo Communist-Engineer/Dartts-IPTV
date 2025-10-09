@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component name="CategoryListItem" extends="Group">
     <interface>
-        <field id="itemContent" type="assocarray" onChange="OnContentChanged" />
+        <field id="itemContent" type="node" onChange="OnContentChanged" />
     </interface>
     <children>
         <!-- Background -->
